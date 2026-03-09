@@ -1,0 +1,9 @@
+# .NET Core
+bin/
+obj/
+.idea/
+*.dll
+*.pdb
+[Dd]ebug/
+[Rr]elease/
+Market-Project/
