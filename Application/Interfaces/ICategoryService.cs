@@ -1,12 +1,14 @@
+using Application.DTOs.Request;
+using Application.DTOs.Response;
 using Domain.Entities;
 
 namespace Application.Interfaces;
 
 public interface ICategoryService
 {
-    Task<List<Category>> GetAllAsync();
-    Task<Category?> GetByIdAsync(int id);
-    Task<Category> CreateAsync(Category category);
-    Task UpdateAsync(Category category);
-    Task DeleteAsync(int id);
+    Task<List<CategoryResponse>> GetAllAsync();
+    Task<CategoryResponse?> GetByIdAsync(int id);
+    Task<CategoryResponse> CreateAsync(CreateCategoryRequest request);
+    Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryRequest request);
+    Task<CategoryResponse?> DeleteAsync(int id);
 }

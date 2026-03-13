@@ -24,9 +24,10 @@ public class ProductRepository : IProductRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task AddAsync(Product product)
+    public async Task<Product> AddAsync(Product product)
     {
         await _db.Products.AddAsync(product);
         await _db.SaveChangesAsync();
+        return product;
     }
 }

@@ -1,10 +1,12 @@
+using Application.DTOs.Request;
+using Application.DTOs.Response;
 using Domain.Entities;
 
 namespace Application.Interfaces;
 
 public interface IProductService
 {
-    Task<List<Product>> GetAllAsync();
-    Task<Product?> GetByIdAsync(int id);
-    Task<Product> CreateAsync(Product product);
+    Task<List<ProductResponse>> GetAllAsync();
+    Task<ProductResponse?> GetByIdAsync(int id);
+    Task<ProductResponse> CreateAsync(CreateProductRequest request);
 }

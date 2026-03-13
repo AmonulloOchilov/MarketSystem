@@ -1,3 +1,4 @@
+using Application.DTOs.Request;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Services;
@@ -32,6 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 
 app.MapGet("/categories", async (ICategoryService service) =>
@@ -39,42 +41,68 @@ app.MapGet("/categories", async (ICategoryService service) =>
     return await service.GetAllAsync();
 });
 
-app.MapGet("/categories{id}", (int id, ICategoryService service) =>
+app.MapGet("/categories/{id}", async (int id, ICategoryService service) =>
 {
-    service.GetByIdAsync(id);
+    var category = await service.GetByIdAsync(id);
+    if (category == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(category);
+    
 });
 
-app.MapPost("/categories", async (ICategoryService service, Category category) =>
+app.MapPost("/categories", async (CreateCategoryRequest request, ICategoryService service) =>
 {
-    var created = await service.CreateAsync(category);
+    var created = await service.CreateAsync(request);
     return Results.Created($"/categories/{created.Id}", created);
 });
 
+app.MapPut("/categories", async (ICategoryService service, UpdateCategoryRequest request,int id) =>
+{
+    var updated = await service.UpdateAsync(id, request);
+    if (updated == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(updated);
+});
+
+app.MapDelete("/categories/{id}", async (ICategoryService service, int id) =>
+{
+    var deleted = await service.DeleteAsync(id);
+    if (deleted == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(deleted);
+});
 
 
 
 app.MapGet("/products", async (IProductService service) =>
 {
-    return await service.GetAllAsync();
+    var result = await service.GetAllAsync();
+    return Results.Ok(result);
 });
 
-app.MapGet("/products{id}", async (int id, IProductService service) =>
+app.MapGet("/products/{id}", async (int id, IProductService service) =>
 {
     var product = await service.GetByIdAsync(id);
     if (product == null)
     {
-        Results.NotFound();
+        return Results.NotFound();
     }
 
     return Results.Ok(product);
 });
 
-app.MapPost("/products", async (Product product, IProductService service) =>
+app.MapPost("/products", async (CreateProductRequest request, IProductService service) =>
 {
-    var created = await service.CreateAsync(product);
+    var created = await service.CreateAsync(request);
     return Results.Created($"/products/{created.Id}", created);
 });
 
-//Finish the CRUD for both!!!
 
 app.Run();

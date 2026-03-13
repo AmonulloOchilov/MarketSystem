@@ -22,16 +22,18 @@ public class CategoryRepository : ICategoryRepository
         return await _db.Categories.FindAsync(id);
     }
 
-    public async Task AddAsync(Category category)
+    public async Task<Category> AddAsync(Category category)
     {
         await _db.Categories.AddAsync(category);
         await _db.SaveChangesAsync();
+        return category;
     }
 
-    public async Task UpdateAsync(Category category)
+    public async Task<Category?> UpdateAsync(Category category)
     {
         _db.Categories.Update(category);
         await _db.SaveChangesAsync();
+        return category;
     }
 
     public async Task DeleteAsync(int id)
