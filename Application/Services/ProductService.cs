@@ -56,4 +56,44 @@ public class ProductService : IProductService
             CategoryId = createdProduct.CategoryId
         };
     }
+
+    public async Task<ProductResponse> UpdateAsync(int id, UpdateProductRequest request)
+    {
+        var product = await _repository.GetByIdAsync(id);
+        if (product == null)
+        {
+            return null;
+        }
+
+        product.Name = request.Name;
+        product.Price = request.Price;
+        product.CategoryId = request.CategoryId;
+
+        var updated = await _repository.UpdateAsync(product);
+        return new ProductResponse()
+        {
+            Id = updated.Id,
+            Name = updated.Name,
+            Price = updated.Price,
+            CategoryId = updated.CategoryId
+        };
+    }
+
+    public async Task<ProductResponse?> DeleteAsync(int id)
+    {
+        var product = await _repository.GetByIdAsync(id);
+        if (product == null)
+        {
+            return null;
+        }
+
+        await _repository.DeleteAsync(id);
+        return new ProductResponse
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Price = product.Price,
+            CategoryId = product.CategoryId
+        };
+    }
 }
