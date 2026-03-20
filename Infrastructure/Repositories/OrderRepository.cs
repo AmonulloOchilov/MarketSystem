@@ -13,6 +13,11 @@ public class OrderRepository:IOrderRepository
         _db = db;
     }
 
+    public async Task<List<Order>> GetAllAsync()
+    {
+        return await _db.Orders.Include(order => order.OrderItems).ToListAsync();
+    }
+
     public async Task<Order> CreateAsync(Order order)
     {
         await _db.Orders.AddAsync(order);
@@ -25,11 +30,5 @@ public class OrderRepository:IOrderRepository
         return await _db.Orders
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == id);
-    }
-
-    public async Task AddItemAsync(OrderItem item)
-    {
-        await _db.OrderItems.AddAsync(item);
-        await _db.SaveChangesAsync();
     }
 }

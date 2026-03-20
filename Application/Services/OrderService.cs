@@ -18,41 +18,68 @@ public class OrderService : IOrderService
         _productRepository = productRepository;
     }
 
-    public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request)
+    public async Task<List<OrderResponse>> GetAllAsync()
+    {
+        var orders = await _orderRepository.GetAllAsync();
+        return orders.Select(o => new OrderResponse()
+        {
+            Id = o.Id,
+            CustomerId = o.CustomerId,
+            CreatedAt = o.CreatedAt,
+            Items = o.OrderItems.Select(i => new OrderItemResponse()
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            })
+
+        }).ToList();
+    }
+
+    public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
     {
         var order = new Order
         {
             CustomerId = request.CustomerId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            OrderItems = new List<OrderItem>()
         };
+        
+        foreach (var item in request.Items)
+        {
+            var product = await _productRepository.GetByIdAsync(item.ProductId);
+            if (product == null)
+            {
+                return null;
+            }
+            var orderItems = new OrderItem()
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                Price = product.Price
+            };
+            order.OrderItems.Add(orderItems);
+        }
+        
 
         var created = await _orderRepository.CreateAsync(order);
 
-        return new OrderResponse
+        var response = new OrderResponse
         {
             Id = created.Id,
             CustomerId = created.CustomerId,
             CreatedAt = created.CreatedAt,
-            Items = new List<OrderItemResponse>()
+            Items = created.OrderItems.Select(oi=> new OrderItemResponse()
+            {
+                ProductId = oi.ProductId,
+                Quantity = oi.Quantity,
+                Price = oi.Price
+            }).ToList()
         };
+        return response;
     }
-
-    public async Task AddItemAsync(int orderId, AddOrderItemRequest request)
-    {
-        var product = await _productRepository.GetByIdAsync(request.ProductId);
-
-        var item = new OrderItem
-        {
-            OrderId = orderId,
-            ProductId = request.ProductId,
-            Quantity = request.Quantity,
-            Price = product.Price
-        };
-
-        await _orderRepository.AddItemAsync(item);
-    }
-
-    public async Task<OrderResponse?> GetOrderAsync(int id)
+    
+    public async Task<OrderResponse?> GetByIdAsync(int id)
     {
         var order = await _orderRepository.GetByIdAsync(id);
 

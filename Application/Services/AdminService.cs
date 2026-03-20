@@ -22,7 +22,9 @@ public class AdminService : IAdminService
         return admins.Select(a => new AdminResponse
         {
             Id = a.Id,
-            Name = a.FirstName,
+            FirstName = a.FirstName,
+            LastName = a.LastName,
+            Role = a.Role,
             Email = a.Email
         }).ToList();
     }
@@ -37,7 +39,9 @@ public class AdminService : IAdminService
         return new AdminResponse
         {
             Id = admin.Id,
-            Name = admin.FirstName,
+            FirstName = admin.FirstName,
+            LastName = admin.LastName,
+            Role = admin.Role,
             Email = admin.Email
         };
     }
@@ -46,7 +50,9 @@ public class AdminService : IAdminService
     {
         var admin = new Admin
         {
-            FirstName = request.Name,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Role = request.Role,
             Email = request.Email
         };
 
@@ -55,7 +61,9 @@ public class AdminService : IAdminService
         return new AdminResponse
         {
             Id = created.Id,
-            Name = created.FirstName,
+            FirstName = created.FirstName,
+            LastName = created.LastName,
+            Role = created.Role,
             Email = created.Email
         };
     }
@@ -65,7 +73,7 @@ public class AdminService : IAdminService
         var admin = new Admin
         {
             Id = id,
-            FirstName = request.Name,
+            FirstName = request.FirstName,
             Email = request.Email
         };
 
@@ -77,7 +85,7 @@ public class AdminService : IAdminService
         return new AdminResponse
         {
             Id = updated.Id,
-            Name = updated.FirstName,
+            FirstName = updated.FirstName,
             Email = updated.Email
         };
     }

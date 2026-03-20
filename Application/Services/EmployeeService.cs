@@ -22,8 +22,10 @@ public class EmployeeService : IEmployeeService
         return employees.Select(e => new EmployeeResponse
         {
             Id = e.Id,
-            Name = e.FirstName,
-            Position = e.Position
+            FirstName = e.FirstName,
+            LastName = e.LastName,
+            Position = e.Position,
+            Email = e.Email
         }).ToList();
     }
 
@@ -32,13 +34,17 @@ public class EmployeeService : IEmployeeService
         var employee = await _repository.GetByIdAsync(id);
 
         if (employee == null)
+        {
             return null;
+        }
 
         return new EmployeeResponse
         {
             Id = employee.Id,
-            Name = employee.FirstName,
-            Position = employee.Position
+            FirstName = employee.FirstName,
+            LastName = employee.LastName,
+            Position = employee.Position,
+            Email = employee.Email
         };
     }
 
@@ -46,8 +52,10 @@ public class EmployeeService : IEmployeeService
     {
         var employee = new Employee
         {
-            FirstName = request.Name,
-            Position = request.Position
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Position = request.Position,
+            Email = request.Email
         };
 
         var created = await _repository.AddAsync(employee);
@@ -55,8 +63,10 @@ public class EmployeeService : IEmployeeService
         return new EmployeeResponse
         {
             Id = created.Id,
-            Name = created.FirstName,
-            Position = created.Position
+            FirstName = created.FirstName,
+            LastName = created.LastName,
+            Position = created.Position,
+            Email = created.Email
         };
     }
 
@@ -65,20 +75,25 @@ public class EmployeeService : IEmployeeService
         var employee = new Employee
         {
             Id = id,
-            FirstName = request.Name,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             Position = request.Position
         };
 
         var updated = await _repository.UpdateAsync(employee);
 
         if (updated == null)
+        {
             return null;
+        }
 
         return new EmployeeResponse
         {
             Id = updated.Id,
-            Name = updated.FirstName,
-            Position = updated.Position
+            FirstName = updated.FirstName,
+            LastName = updated.LastName,
+            Position = updated.Position,
+            Email = updated.Email
         };
     }
 

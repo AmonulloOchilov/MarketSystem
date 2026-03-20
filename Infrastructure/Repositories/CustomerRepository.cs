@@ -8,7 +8,10 @@ public class CustomerRepository : ICustomerRepository
 {
     private readonly MarketDbContext _db;
 
-
+    public CustomerRepository(MarketDbContext db)
+    {
+        _db = db;
+    }
     public async Task<List<Customer>> GetAllAsync()
     {
         return await _db.Customers.ToListAsync();
