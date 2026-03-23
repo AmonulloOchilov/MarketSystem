@@ -2,9 +2,13 @@ using Application.DTOs.Request;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Services;
+using Application.Validators.Product;
 using Domain.Entities;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Infrastructure;
 using Infrastructure.Repositories;
+using MarketSystem.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +44,11 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<ExceptionMiddleware>();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,6 +57,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.MapControllers();
 
 app.Run();
