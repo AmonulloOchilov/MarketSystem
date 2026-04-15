@@ -3,6 +3,7 @@ using Application.DTOs.Response;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
@@ -10,17 +11,27 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
+    private readonly ILogger<OrderService> _logger;
 
     public OrderService(IOrderRepository orderRepository,
-        IProductRepository productRepository)
+        IProductRepository productRepository, ILogger<OrderService> logger)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
+        _logger = logger;
     }
 
-    public async Task<List<OrderResponse>> GetAllAsync()
+    public async Task<List<OrderResponse>> GetAllAsync(int pageNumber, int pageSize)
     {
-        var orders = await _orderRepository.GetAllAsync();
+        _logger.LogInformation("Fetching orders. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+        
+        if (pageNumber <= 0 || pageSize <= 0)
+        {
+            _logger.LogWarning("Invalid pagination parameters. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+            return new List<OrderResponse>();
+        }
+        
+        var orders = await _orderRepository.GetAllAsync(pageNumber,pageSize);
         return orders.Select(o => new OrderResponse()
         {
             Id = o.Id,
@@ -38,6 +49,8 @@ public class OrderService : IOrderService
 
     public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
     {
+        _logger.LogInformation("Creating order using Customer ID: {CustomerId}", request.CustomerId);
+        
         var order = new Order
         {
             CustomerId = request.CustomerId,
@@ -50,6 +63,7 @@ public class OrderService : IOrderService
             var product = await _productRepository.GetByIdAsync(item.ProductId);
             if (product == null)
             {
+                _logger.LogWarning("Product with ID {ProductId} not found while creating order", item.ProductId);
                 return null;
             }
             var orderItems = new OrderItem()
@@ -59,10 +73,15 @@ public class OrderService : IOrderService
                 Price = product.Price
             };
             order.OrderItems.Add(orderItems);
+
+            _logger.LogInformation("Adding product {ProductId} with quantity {Quantity} to order",
+                orderItems.ProductId, orderItems.Quantity);
         }
-        
+        _logger.LogInformation("Order contains {ItemCount} items", order.OrderItems.Count);
 
         var created = await _orderRepository.CreateAsync(order);
+        
+        _logger.LogInformation("Order created successfully with ID: {OrderId}", created.Id);
 
         var response = new OrderResponse
         {
@@ -84,7 +103,10 @@ public class OrderService : IOrderService
         var order = await _orderRepository.GetByIdAsync(id);
 
         if (order == null)
+        {
+            _logger.LogWarning("Order with ID {OrderId} not found", id);
             return null;
+        }
 
         return new OrderResponse
         {

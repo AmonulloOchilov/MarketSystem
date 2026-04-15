@@ -14,14 +14,15 @@ public class OrderController : ControllerBase
     {
         _service = service;
     }
-    
+
     [HttpGet]
-    public async Task<ActionResult<OrderResponse>> GetAllAsync()
+    public async Task<ActionResult<OrderResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync());
+        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
     }
     
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<OrderResponse>> GetByIdAsync(int id)
     {
         return Ok(await _service.GetByIdAsync(id));

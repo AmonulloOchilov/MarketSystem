@@ -6,7 +6,7 @@ namespace Application.Interfaces;
 
 public interface ICategoryService
 {
-    Task<List<CategoryResponse>> GetAllAsync();
+    Task<List<CategoryResponse>> GetAllAsync(int pageNumber, int pageSize);
     Task<CategoryResponse?> GetByIdAsync(int id);
     Task<CategoryResponse> CreateAsync(CreateCategoryRequest request);
     Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryRequest request);

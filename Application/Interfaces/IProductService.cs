@@ -6,7 +6,7 @@ namespace Application.Interfaces;
 
 public interface IProductService
 {
-    Task<List<ProductResponse>> GetAllAsync();
+    Task<List<ProductResponse>> GetAllAsync(int pageNumber, int pageSize);
     Task<ProductResponse?> GetByIdAsync(int id);
     Task<ProductResponse> CreateAsync(CreateProductRequest request);
     Task<ProductResponse?> UpdateAsync(int id, UpdateProductRequest request);

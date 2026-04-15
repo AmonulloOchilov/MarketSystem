@@ -5,7 +5,7 @@ namespace Application.Interfaces;
 
 public interface IOrderService
 {
-    Task<List<OrderResponse>> GetAllAsync();
+    Task<List<OrderResponse>> GetAllAsync(int pageNumber, int pageSize);
     Task<OrderResponse> CreateAsync(CreateOrderRequest request);
     Task<OrderResponse?> GetByIdAsync(int id);
 }

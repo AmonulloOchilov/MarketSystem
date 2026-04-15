@@ -16,15 +16,22 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ProductResponse>> GetAllAsync()
+    public async Task<ActionResult<List<ProductResponse>>> GetAllAsync([FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync());
+        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<ProductResponse>> GetByIdAsync(int id)
     {
-        return Ok(await _service.GetByIdAsync(id));
+        var result = await _service.GetByIdAsync(id);
+        if (result == null)
+        {
+            return NotFound();
+        }
+        
+        return Ok(result);
     }
 
     [HttpPost]
@@ -33,15 +40,26 @@ public class ProductController : ControllerBase
         return Ok(await _service.CreateAsync(request));
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(int id, UpdateProductRequest request)
     {
-        return Ok(await _service.UpdateAsync(id, request));
+        var result = await _service.UpdateAsync(id, request);
+        if (result == null)
+        {
+            return NotFound();
+        }
+        
+        return Ok(result);
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        return Ok(await _service.DeleteAsync(id));
+        var result = await _service.DeleteAsync(id);
+        if (result == null)
+        {
+            return NotFound();
+        }
+        return Ok(result);
     }
 }

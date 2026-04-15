@@ -6,7 +6,7 @@ namespace Application.Interfaces.Repositories;
 
 public interface ICategoryRepository
 {
-    Task<List<Category>> GetAllAsync();
+    Task<List<Category>> GetAllAsync(int pageNumber, int pageSize);
     Task<Category?> GetByIdAsync(int id);
     Task<Category> AddAsync(Category category);
     Task<Category?> UpdateAsync(Category category);

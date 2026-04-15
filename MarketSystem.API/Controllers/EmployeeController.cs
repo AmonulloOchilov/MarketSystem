@@ -14,14 +14,15 @@ public class EmployeeController : ControllerBase
     {
         _service = service;
     }
-    
+
     [HttpGet]
-    public async Task<ActionResult<EmployeeResponse>> GetAllAsync()
+    public async Task<ActionResult<EmployeeResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync());
+        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<EmployeeResponse>> GetByIdAsync(int id)
     {
         return Ok(await _service.GetByIdAsync(id));
@@ -33,16 +34,20 @@ public class EmployeeController : ControllerBase
         return Ok(await _service.CreateAsync(request));
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(int id, UpdateEmployeeRequest request)
     {
         return Ok(await _service.UpdateAsync(id, request));
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        await _service.DeleteAsync(id);
-        return Ok();
+        var result = await _service.DeleteAsync(id);
+        if (result == null)
+        {
+            return NotFound();
+        }
+        return Ok(result);
     }
 }

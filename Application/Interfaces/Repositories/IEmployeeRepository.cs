@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories;
 
 public interface IEmployeeRepository
 {
-    Task<List<Employee>> GetAllAsync();
+    Task<List<Employee>> GetAllAsync(int pageNumber, int pageSize);
 
     Task<Employee?> GetByIdAsync(int id);
 

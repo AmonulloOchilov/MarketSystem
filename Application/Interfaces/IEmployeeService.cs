@@ -5,7 +5,7 @@ namespace Application.Interfaces;
 
 public interface IEmployeeService
 {
-    Task<List<EmployeeResponse>> GetAllAsync();
+    Task<List<EmployeeResponse>> GetAllAsync(int pageNumber, int pageSize);
 
     Task<EmployeeResponse?> GetByIdAsync(int id);
 
@@ -13,5 +13,5 @@ public interface IEmployeeService
 
     Task<EmployeeResponse?> UpdateAsync(int id, UpdateEmployeeRequest request);
 
-    Task DeleteAsync(int id);
+    Task<EmployeeResponse?> DeleteAsync(int id);
 }
