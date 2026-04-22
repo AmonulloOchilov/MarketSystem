@@ -1,25 +1,38 @@
+using Application.Common;
 using Application.DTOs.Request;
 using Application.DTOs.Response;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
 public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _repository;
+    private readonly ILogger<EmployeeService> _logger;
 
-    public EmployeeService(IEmployeeRepository repository)
+    public EmployeeService(IEmployeeRepository repository, ILogger<EmployeeService> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
-    public async Task<List<EmployeeResponse>> GetAllAsync()
+    public async Task<PagedResponse<EmployeeResponse>> GetAllAsync(int pageNumber, int pageSize)
     {
-        var employees = await _repository.GetAllAsync();
-
-        return employees.Select(e => new EmployeeResponse
+        _logger.LogInformation("Fetching employees. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+        
+        if (pageNumber <= 0 || pageSize <= 0)
+        {
+            _logger.LogWarning("Invalid pagination parameters. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+            return new PagedResponse<EmployeeResponse>();
+        }
+        
+        var employees = await _repository.GetAllAsync(pageNumber, pageSize);
+        
+        var items = employees.Items.Select(e => new EmployeeResponse
         {
             Id = e.Id,
             FirstName = e.FirstName,
@@ -27,6 +40,16 @@ public class EmployeeService : IEmployeeService
             Position = e.Position,
             Email = e.Email
         }).ToList();
+        
+        _logger.LogInformation("Returned {Count} employees out of {Total}", items.Count, employees.TotalCount);
+        
+        return new PagedResponse<EmployeeResponse>()
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = employees.TotalCount
+        };
     }
 
     public async Task<EmployeeResponse?> GetByIdAsync(int id)
@@ -35,7 +58,8 @@ public class EmployeeService : IEmployeeService
 
         if (employee == null)
         {
-            return null;
+            _logger.LogWarning("Employee with ID {EmployeeId} not found", id);
+            throw new EmployeeNotFoundException(id);
         }
 
         return new EmployeeResponse
@@ -50,6 +74,9 @@ public class EmployeeService : IEmployeeService
 
     public async Task<EmployeeResponse> CreateAsync(CreateEmployeeRequest request)
     {
+        _logger.LogInformation("Creating employee. Name: {EmployeeName}, Surname: {EmployeeSurname}", request.FirstName,
+            request.LastName);
+        
         var employee = new Employee
         {
             FirstName = request.FirstName,
@@ -59,6 +86,8 @@ public class EmployeeService : IEmployeeService
         };
 
         var created = await _repository.AddAsync(employee);
+        
+        _logger.LogInformation("Employee created successfully with ID: {EmployeeId}", created.Id);
 
         return new EmployeeResponse
         {
@@ -72,20 +101,31 @@ public class EmployeeService : IEmployeeService
 
     public async Task<EmployeeResponse?> UpdateAsync(int id, UpdateEmployeeRequest request)
     {
-        var employee = new Employee
-        {
-            Id = id,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Position = request.Position
-        };
+        _logger.LogInformation("Updating employee with ID: {EmployeeId}", id);
+        
+        var employee = await _repository.GetByIdAsync(id);
 
+        if (employee == null)
+        {
+            _logger.LogWarning("Employee with ID {CustomerId} not found", id);
+            throw new EmployeeNotFoundException(id);
+        }
+
+        employee.Id = id;
+        employee.FirstName = request.FirstName;
+        employee.LastName = request.LastName;
+        employee.Position = request.Position;
+        
         var updated = await _repository.UpdateAsync(employee);
 
         if (updated == null)
         {
-            return null;
+            throw new EmployeeNotFoundException(id);
         }
+        
+        _logger.LogInformation(
+            "Employee {EmployeeId} updated successfully. Name: {EmployeeName}, Surname: {EmployeeSurname}", id,
+            updated.FirstName, updated.LastName);
 
         return new EmployeeResponse
         {
@@ -97,8 +137,21 @@ public class EmployeeService : IEmployeeService
         };
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool?> DeleteAsync(int id)
     {
+        _logger.LogInformation("Deleting employee with ID: {EmployeeId}", id);
+        
+        var employee = await _repository.GetByIdAsync(id);
+        if (employee == null)
+        {
+            _logger.LogWarning("Employee with ID {EmployeeId} not found", id);
+            throw new EmployeeNotFoundException(id);
+        }
+
         await _repository.DeleteAsync(id);
+        
+        _logger.LogInformation("Employee deleted successfully with ID: {EmployeeId}", id);
+
+        return true;
     }
 }

@@ -1,3 +1,5 @@
+using Application.Exceptions;
+
 namespace MarketSystem.API.Middlewares;
 
 public class ExceptionMiddleware : IMiddleware
@@ -17,11 +19,28 @@ public class ExceptionMiddleware : IMiddleware
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
-            context.Response.StatusCode = 500;
-            await context.Response.WriteAsJsonAsync(new
+            
+            context.Response.ContentType = "application/json";
+            
+            if (e is BaseException baseException)
             {
-                message = "Internal server error"
-            });
+                context.Response.StatusCode = baseException.StatusCode;
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    statusCode = baseException.StatusCode,
+                    message = baseException.Message
+                });
+            }
+            
+            else
+            {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    message = "Internal server error"
+                });
+            }
+            
         }
     }
 }

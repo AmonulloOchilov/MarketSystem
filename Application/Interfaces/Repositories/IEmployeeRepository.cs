@@ -1,10 +1,11 @@
+using Application.Common;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories;
 
 public interface IEmployeeRepository
 {
-    Task<List<Employee>> GetAllAsync();
+    Task<PagedResult<Employee>> GetAllAsync(int pageNumber, int pageSize);
 
     Task<Employee?> GetByIdAsync(int id);
 

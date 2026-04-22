@@ -17,15 +17,18 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<CustomerResponse>> GetAllAsync()
+    public async Task<ActionResult<CustomerResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync());
+        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<CustomerResponse>> GetByIdAsync(int id)
     {
-        return Ok(await _service.GetByIdAsync(id));
+        var result = await _service.GetByIdAsync(id);
+        
+        return Ok(result);
     }
 
     [HttpPost]
@@ -34,15 +37,19 @@ public class CustomerController : ControllerBase
         return Ok(await _service.CreateAsync(request));
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(int id, UpdateCustomerRequest request)
     {
-        return Ok(await _service.UpdateAsync(id, request));
+        var result = await _service.UpdateAsync(id, request);
+       
+        return Ok(result);
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        return Ok(await _service.DeleteAsync(id));
+        var result = await _service.DeleteAsync(id);
+        
+        return Ok(result);
     }
 }

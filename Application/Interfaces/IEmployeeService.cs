@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.DTOs.Request;
 using Application.DTOs.Response;
 
@@ -5,7 +6,7 @@ namespace Application.Interfaces;
 
 public interface IEmployeeService
 {
-    Task<List<EmployeeResponse>> GetAllAsync();
+    Task<PagedResponse<EmployeeResponse>> GetAllAsync(int pageNumber, int pageSize);
 
     Task<EmployeeResponse?> GetByIdAsync(int id);
 
@@ -13,5 +14,5 @@ public interface IEmployeeService
 
     Task<EmployeeResponse?> UpdateAsync(int id, UpdateEmployeeRequest request);
 
-    Task DeleteAsync(int id);
+    Task<bool?> DeleteAsync(int id);
 }
