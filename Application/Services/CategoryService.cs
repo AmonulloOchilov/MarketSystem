@@ -1,3 +1,5 @@
+using Application.DTOs.Request;
+using Application.DTOs.Response;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -12,29 +14,70 @@ public class CategoryService : ICategoryService
     {
         _repository = repository;
     }
-    public async Task<List<Category>> GetAllAsync()
+    public async Task<List<CategoryResponse>> GetAllAsync()
     {
-        return await _repository.GetAllAsync();
+        var categories = await _repository.GetAllAsync();
+        return categories.Select(c => new CategoryResponse()
+        {
+            Id = c.Id,
+            Name = c.Name
+        }).ToList();
     }
 
-    public async Task<Category?> GetByIdAsync(int id)
+    public async Task<CategoryResponse?> GetByIdAsync(int id)
     {
-        return await _repository.GetByIdAsync(id);
+        var category = await _repository.GetByIdAsync(id);
+        return new CategoryResponse()
+        {
+            Id = category.Id,
+            Name = category.Name
+        };
     }
 
-    public async Task<Category> CreateAsync(Category category)
+    public async Task<CategoryResponse> CreateAsync(CreateCategoryRequest request)
     {
-        await _repository.AddAsync(category);
-        return category;
+        var category = new Category
+        {
+            Name = request.Name
+        };
+        var createdCategory = await _repository.AddAsync(category);
+        return new CategoryResponse()
+        {
+            Id = createdCategory.Id,
+            Name = createdCategory.Name
+        };
     }
 
-    public async Task UpdateAsync(Category category)
+    public async Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryRequest request)
     {
+        var category = await _repository.GetByIdAsync(id);
+        if (category == null)
+        {
+            return null;
+        }
+
+        category.Name = request.Name;
         await _repository.UpdateAsync(category);
+        return new CategoryResponse()
+        {
+            Id = category.Id,
+            Name = category.Name
+        };
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<CategoryResponse?> DeleteAsync(int id)
     {
+        var category = await _repository.GetByIdAsync(id);
+        if (category == null)
+        {
+            return null;
+        }
+
         await _repository.DeleteAsync(id);
+        return new CategoryResponse()
+        {
+            Id = category.Id,
+            Name = category.Name
+        };
     }
 }

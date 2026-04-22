@@ -1,0 +1,17 @@
+using Application.DTOs.Request;
+using Application.DTOs.Response;
+
+namespace Application.Interfaces;
+
+public interface IEmployeeService
+{
+    Task<List<EmployeeResponse>> GetAllAsync();
+
+    Task<EmployeeResponse?> GetByIdAsync(int id);
+
+    Task<EmployeeResponse> CreateAsync(CreateEmployeeRequest request);
+
+    Task<EmployeeResponse?> UpdateAsync(int id, UpdateEmployeeRequest request);
+
+    Task DeleteAsync(int id);
+}

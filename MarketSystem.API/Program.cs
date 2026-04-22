@@ -1,9 +1,14 @@
+using Application.DTOs.Request;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Services;
+using Application.Validators.Product;
 using Domain.Entities;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Infrastructure;
 using Infrastructure.Repositories;
+using MarketSystem.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,8 +26,28 @@ builder.Services.AddDbContext<MarketDbContext>(options =>
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+builder.Services.AddControllers();
+
+builder.Services.AddScoped<ExceptionMiddleware>();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
 
 var app = builder.Build();
 
@@ -33,48 +58,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
 
-app.MapGet("/categories", async (ICategoryService service) =>
-{
-    return await service.GetAllAsync();
-});
-
-app.MapGet("/categories{id}", (int id, ICategoryService service) =>
-{
-    service.GetByIdAsync(id);
-});
-
-app.MapPost("/categories", async (ICategoryService service, Category category) =>
-{
-    var created = await service.CreateAsync(category);
-    return Results.Created($"/categories/{created.Id}", created);
-});
-
-
-
-
-app.MapGet("/products", async (IProductService service) =>
-{
-    return await service.GetAllAsync();
-});
-
-app.MapGet("/products{id}", async (int id, IProductService service) =>
-{
-    var product = await service.GetByIdAsync(id);
-    if (product == null)
-    {
-        Results.NotFound();
-    }
-
-    return Results.Ok(product);
-});
-
-app.MapPost("/products", async (Product product, IProductService service) =>
-{
-    var created = await service.CreateAsync(product);
-    return Results.Created($"/products/{created.Id}", created);
-});
-
-//Finish the CRUD for both!!!
+app.MapControllers();
 
 app.Run();
