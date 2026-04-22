@@ -27,10 +27,6 @@ public class CustomerController : ControllerBase
     public async Task<ActionResult<CustomerResponse>> GetByIdAsync(int id)
     {
         var result = await _service.GetByIdAsync(id);
-        if (result == null)
-        {
-            return NotFound();
-        }
         
         return Ok(result);
     }
@@ -45,11 +41,7 @@ public class CustomerController : ControllerBase
     public async Task<IActionResult> UpdateAsync(int id, UpdateCustomerRequest request)
     {
         var result = await _service.UpdateAsync(id, request);
-        if (result == null)
-        {
-            return NotFound();
-        }
-        
+       
         return Ok(result);
     }
 
@@ -57,10 +49,7 @@ public class CustomerController : ControllerBase
     public async Task<IActionResult> DeleteAsync(int id)
     {
         var result = await _service.DeleteAsync(id);
-        if (result == null)
-        {
-            return NotFound();
-        }
+        
         return Ok(result);
     }
 }

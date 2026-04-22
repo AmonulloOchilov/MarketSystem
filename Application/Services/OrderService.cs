@@ -1,5 +1,7 @@
+using Application.Common;
 using Application.DTOs.Request;
 using Application.DTOs.Response;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -21,18 +23,19 @@ public class OrderService : IOrderService
         _logger = logger;
     }
 
-    public async Task<List<OrderResponse>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResponse<OrderResponse>> GetAllAsync(int pageNumber, int pageSize)
     {
         _logger.LogInformation("Fetching orders. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
         
         if (pageNumber <= 0 || pageSize <= 0)
         {
             _logger.LogWarning("Invalid pagination parameters. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
-            return new List<OrderResponse>();
+            return new PagedResponse<OrderResponse>();
         }
-        
+
         var orders = await _orderRepository.GetAllAsync(pageNumber,pageSize);
-        return orders.Select(o => new OrderResponse()
+        
+        var items = orders.Items.Select(o => new OrderResponse()
         {
             Id = o.Id,
             CustomerId = o.CustomerId,
@@ -42,9 +45,19 @@ public class OrderService : IOrderService
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
                 Price = i.Price
-            })
+            }).ToList()
 
         }).ToList();
+
+        _logger.LogInformation("Returned {Count} orders out of {Total}", items.Count, orders.TotalCount);
+        
+        return new PagedResponse<OrderResponse>()
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = orders.TotalCount
+        };
     }
 
     public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
@@ -64,7 +77,7 @@ public class OrderService : IOrderService
             if (product == null)
             {
                 _logger.LogWarning("Product with ID {ProductId} not found while creating order", item.ProductId);
-                return null;
+                throw new ProductNotFoundException(item.ProductId);
             }
             var orderItems = new OrderItem()
             {
@@ -105,7 +118,7 @@ public class OrderService : IOrderService
         if (order == null)
         {
             _logger.LogWarning("Order with ID {OrderId} not found", id);
-            return null;
+            throw new OrderNotFoundException(id);
         }
 
         return new OrderResponse

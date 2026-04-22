@@ -1,3 +1,5 @@
+using Application.Common;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +17,20 @@ public class ProductRepository : IProductRepository
         _db = db;
         _logger = logger;
     }
-    public async Task<List<Product>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResult<Product>> GetAllAsync(int pageNumber, int pageSize)
     {
-        return await _db.Products.Include(p => p.Category).OrderBy(p => p.Id).Skip((pageNumber - 1) * pageSize)
+        var totalCount = await _db.Products.CountAsync();
+        var items = await _db.Products
+            .OrderBy(p => p.Id)
+            .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        return new PagedResult<Product>()
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<Product?> GetByIdAsync(int id)
@@ -27,11 +38,6 @@ public class ProductRepository : IProductRepository
         var result = await _db.Products.Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
         
-        if (result == null)
-        {
-            _logger.LogWarning("Product not found in database. Product ID: {ProductId}", id);
-            return null;
-        }
         return result;
     }
 
@@ -50,6 +56,7 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> UpdateAsync(Product product)
     {
         var existingProduct = await _db.Products.FindAsync(product.Id);
+
         if (existingProduct == null)
         {
             _logger.LogWarning("Cannot update. Product not found. ProductId: {ProductId}", product.Id);
@@ -58,26 +65,31 @@ public class ProductRepository : IProductRepository
         
         _logger.LogInformation("Updating product. ProductId: {ProductId}", product.Id);
         
-        _db.Products.Update(product);
+        existingProduct.Name = product.Name;
+        existingProduct.Price = product.Price;
+        existingProduct.CategoryId = product.CategoryId;
+
         await _db.SaveChangesAsync();
-        
-        _logger.LogInformation("Product updated successfully");
-        return product;
+
+        return existingProduct;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<Product> DeleteAsync(int id)
     {
         var product = await _db.Products.FindAsync(id);
+        
         if (product == null)
         {
             _logger.LogWarning("Cannot delete. Product not found. ProductId: {ProductId}", id);
-            return;
+            throw new ProductNotFoundException(id);
         }
+        
         _logger.LogInformation("Deleting product from database. Product ID: {ProductId}", id);
         
         _db.Products.Remove(product);
         await _db.SaveChangesAsync();
         
         _logger.LogInformation("Product deleted from database. Product ID: {ProductId}", id);
+        return product;
     }
 }

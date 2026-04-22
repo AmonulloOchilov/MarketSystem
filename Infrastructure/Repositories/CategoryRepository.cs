@@ -1,3 +1,5 @@
+using Application.Common;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +17,20 @@ public class CategoryRepository : ICategoryRepository
         _db = db;
         _logger = logger;
     }
-    public async Task<List<Category>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResult<Category>> GetAllAsync(int pageNumber, int pageSize)
     {
-        return await _db.Categories.OrderBy(c => c.Id)
-            .Take((pageNumber - 1) * pageSize)
-            .Take(pageSize).ToListAsync();
+        var totalCount = await _db.Categories.CountAsync();
+        var items = await _db.Categories
+            .OrderBy(c => c.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return new PagedResult<Category>()
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<Category?> GetByIdAsync(int id)
@@ -28,7 +39,7 @@ public class CategoryRepository : ICategoryRepository
         if (result == null)
         {
             _logger.LogWarning("Category not found in database. Category ID: {CategoryId}", id);
-            return null;
+            throw new CategoryNotFoundException(id);
         }
         return result;
     }
@@ -61,7 +72,7 @@ public class CategoryRepository : ICategoryRepository
         if (category == null)
         {
             _logger.LogWarning("Cannot delete. Category not found. Category ID: {CategoryId}", id);
-            return;
+            throw new CategoryNotFoundException(id);
         }
         _logger.LogInformation("Deleting category from database. Category ID: {CategoryId}", id);
         

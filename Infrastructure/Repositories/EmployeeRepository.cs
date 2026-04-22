@@ -1,3 +1,5 @@
+using Application.Common;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +18,20 @@ public class EmployeeRepository : IEmployeeRepository
         _logger = logger;
     }
 
-    public async Task<List<Employee>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResult<Employee>> GetAllAsync(int pageNumber, int pageSize)
     {
-        return await _db.Employees.OrderBy(e=>e.Id).Skip((pageNumber - 1) * pageSize)
+        var totalCount = await _db.Employees.CountAsync();
+        var items = await _db.Employees
+            .OrderBy(e=>e.Id)
+            .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+        
+        return new PagedResult<Employee>()
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<Employee?> GetByIdAsync(int id)
@@ -31,7 +42,7 @@ public class EmployeeRepository : IEmployeeRepository
         if (result == null)
         {
             _logger.LogWarning("Employee not found in database. Employee ID: {EmployeeId}", id);
-            return null;
+            throw new EmployeeNotFoundException(id);
         }
         return result;
     }
@@ -55,7 +66,7 @@ public class EmployeeRepository : IEmployeeRepository
         if (existing == null)
         {
             _logger.LogWarning("Cannot update. Employee not found. EmployeeId: {EmployeeId}", employee.Id);
-            return null;
+            throw new EmployeeNotFoundException(existing.Id);
         }
         
         _logger.LogInformation("Updating employee. Employee ID: {EmployeeId}", employee.Id);
@@ -75,7 +86,7 @@ public class EmployeeRepository : IEmployeeRepository
         if (employee == null)
         {
             _logger.LogWarning("Cannot delete. Employee not found. Employee ID: {EmployeeId}", id);
-            return;
+            throw new EmployeeNotFoundException(id);
         }
         _logger.LogInformation("Deleting employee from database. Employee ID: {EmployeeId}", id);
         

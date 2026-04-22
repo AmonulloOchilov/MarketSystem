@@ -1,3 +1,5 @@
+using Application.Common;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +17,20 @@ public class CustomerRepository : ICustomerRepository
         _db = db;
         _logger = logger;
     }
-    public async Task<List<Customer>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResult<Customer>> GetAllAsync(int pageNumber, int pageSize)
     {
-        return await _db.Customers.OrderBy(c => c.Id)
+        var totalCount = await _db.Customers.CountAsync();
+        var items =  await _db.Customers
+            .OrderBy(c => c.Id)
             .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize).ToListAsync();
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return new PagedResult<Customer>()
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<Customer> GetByIdAsync(int id)
@@ -28,7 +39,7 @@ public class CustomerRepository : ICustomerRepository
         if (result == null)
         {
             _logger.LogWarning("Customer not found in database. Employee ID: {EmployeeId}", id);
-            return null;
+            throw new CustomerNotFoundException(id);
         }
         return result;
     }
@@ -62,7 +73,7 @@ public class CustomerRepository : ICustomerRepository
         if (customer == null)
         {
             _logger.LogWarning("Cannot delete. Customer not found. Customer ID: {CustomerId}", id);
-            return;
+            throw new CustomerNotFoundException(id);
         }
         _logger.LogInformation("Deleting customer from database. Customer ID: {CustomerId}", id);
         

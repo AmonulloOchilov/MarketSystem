@@ -1,3 +1,5 @@
+using Application.Common;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +18,20 @@ public class OrderRepository:IOrderRepository
         _logger = logger;
     }
 
-    public async Task<List<Order>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResult<Order>> GetAllAsync(int pageNumber, int pageSize)
     {
-        return await _db.Orders.Include(order => order.OrderItems)
+        var totalCount = await _db.Orders.CountAsync();
+        var items = await _db.Orders.Include(order => order.OrderItems)
             .OrderBy(o => o.Id)
             .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize).ToListAsync();
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return new PagedResult<Order>()
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<Order> CreateAsync(Order order)
@@ -44,7 +54,7 @@ public class OrderRepository:IOrderRepository
         if (result == null)
         {
             _logger.LogWarning("Order not found in database. Order ID: {ProductId}", id);
-            return null;
+            throw new OrderNotFoundException(id);
         }
         return result;
     }

@@ -1,5 +1,7 @@
+using Application.Common;
 using Application.DTOs.Request;
 using Application.DTOs.Response;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -18,19 +20,19 @@ public class EmployeeService : IEmployeeService
         _logger = logger;
     }
 
-    public async Task<List<EmployeeResponse>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResponse<EmployeeResponse>> GetAllAsync(int pageNumber, int pageSize)
     {
-        _logger.LogInformation("Fetching categories. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+        _logger.LogInformation("Fetching employees. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
         
         if (pageNumber <= 0 || pageSize <= 0)
         {
             _logger.LogWarning("Invalid pagination parameters. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
-            return new List<EmployeeResponse>();
+            return new PagedResponse<EmployeeResponse>();
         }
         
         var employees = await _repository.GetAllAsync(pageNumber, pageSize);
-
-        return employees.Select(e => new EmployeeResponse
+        
+        var items = employees.Items.Select(e => new EmployeeResponse
         {
             Id = e.Id,
             FirstName = e.FirstName,
@@ -38,6 +40,16 @@ public class EmployeeService : IEmployeeService
             Position = e.Position,
             Email = e.Email
         }).ToList();
+        
+        _logger.LogInformation("Returned {Count} employees out of {Total}", items.Count, employees.TotalCount);
+        
+        return new PagedResponse<EmployeeResponse>()
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = employees.TotalCount
+        };
     }
 
     public async Task<EmployeeResponse?> GetByIdAsync(int id)
@@ -47,7 +59,7 @@ public class EmployeeService : IEmployeeService
         if (employee == null)
         {
             _logger.LogWarning("Employee with ID {EmployeeId} not found", id);
-            return null;
+            throw new EmployeeNotFoundException(id);
         }
 
         return new EmployeeResponse
@@ -96,7 +108,7 @@ public class EmployeeService : IEmployeeService
         if (employee == null)
         {
             _logger.LogWarning("Employee with ID {CustomerId} not found", id);
-            return null;
+            throw new EmployeeNotFoundException(id);
         }
 
         employee.Id = id;
@@ -108,7 +120,7 @@ public class EmployeeService : IEmployeeService
 
         if (updated == null)
         {
-            return null;
+            throw new EmployeeNotFoundException(id);
         }
         
         _logger.LogInformation(
@@ -125,7 +137,7 @@ public class EmployeeService : IEmployeeService
         };
     }
 
-    public async Task<EmployeeResponse?> DeleteAsync(int id)
+    public async Task<bool?> DeleteAsync(int id)
     {
         _logger.LogInformation("Deleting employee with ID: {EmployeeId}", id);
         
@@ -133,20 +145,13 @@ public class EmployeeService : IEmployeeService
         if (employee == null)
         {
             _logger.LogWarning("Employee with ID {EmployeeId} not found", id);
-            return null;
+            throw new EmployeeNotFoundException(id);
         }
 
         await _repository.DeleteAsync(id);
         
         _logger.LogInformation("Employee deleted successfully with ID: {EmployeeId}", id);
-        
-        return new EmployeeResponse
-        {
-            Id = employee.Id,
-            FirstName = employee.FirstName,
-            LastName = employee.LastName,
-            Position = employee.Position,
-            Email = employee.Email
-        };
+
+        return true;
     }
 }

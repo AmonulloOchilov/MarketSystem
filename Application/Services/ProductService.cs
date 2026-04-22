@@ -1,5 +1,7 @@
+using Application.Common;
 using Application.DTOs.Request;
 using Application.DTOs.Response;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -18,17 +20,17 @@ public class ProductService : IProductService
         _logger = logger;
     }
     
-    public async Task<List<ProductResponse>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResponse<ProductResponse>> GetAllAsync(int pageNumber, int pageSize)
     {
         _logger.LogInformation("Fetching products. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
         if (pageNumber <= 0 || pageSize <= 0)
         {
             _logger.LogWarning("Invalid pagination parameters. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
-            return new List<ProductResponse>();
+            return new PagedResponse<ProductResponse>();
         }
         
         var product = await _repository.GetAllAsync(pageNumber, pageSize);
-        var result = product.Select(p => new ProductResponse()
+        var items = product.Items.Select(p => new ProductResponse()
         {
             Id = p.Id,
             Name = p.Name,
@@ -36,8 +38,14 @@ public class ProductService : IProductService
             CategoryId = p.CategoryId
         }).ToList();
         
-        _logger.LogInformation("Returned {Count} products", result.Count);
-        return result;
+        _logger.LogInformation("Returned {Count} products out of {Total}", items.Count, product.TotalCount);
+        return new PagedResponse<ProductResponse>()
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = product.TotalCount
+        };
     }
 
     public async Task<ProductResponse?> GetByIdAsync(int id)
@@ -47,7 +55,7 @@ public class ProductService : IProductService
         if (product == null)
         {
             _logger.LogWarning("Product with ID {ProductId} not found", id);
-            return null;
+            throw new ProductNotFoundException(id);
         }
         
         return new ProductResponse()
@@ -90,7 +98,7 @@ public class ProductService : IProductService
         if (product == null)
         {
             _logger.LogWarning("Product with {ProductId} not found", id);
-            return null;
+            throw new ProductNotFoundException(id);
         }
 
         product.Name = request.Name;
@@ -111,7 +119,7 @@ public class ProductService : IProductService
         };
     }
 
-    public async Task<ProductResponse?> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
         _logger.LogInformation("Deleting product with ID: {ProductId}", id);
         
@@ -119,19 +127,13 @@ public class ProductService : IProductService
         if (product == null)
         {
             _logger.LogWarning("Product with ID {ProductId} not found", id);
-            return null;
+            throw new ProductNotFoundException(id);
         }
 
         await _repository.DeleteAsync(id);
         
         _logger.LogInformation("Product deleted successfully with ID: {ProductId}", id);
-        
-        return new ProductResponse
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price,
-            CategoryId = product.CategoryId
-        };
+
+        return true;
     }
 }

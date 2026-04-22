@@ -1,5 +1,7 @@
+using Application.Common;
 using Application.DTOs.Request;
 using Application.DTOs.Response;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -16,21 +18,32 @@ public class CategoryService : ICategoryService
         _repository = repository;
         _logger = logger;
     }
-    public async Task<List<CategoryResponse>> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<PagedResponse<CategoryResponse>> GetAllAsync(int pageNumber, int pageSize)
     {
         _logger.LogInformation("Fetching categories. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
         if (pageNumber <= 0 || pageSize <= 0)
         {
             _logger.LogWarning("Invalid pagination parameters. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
-            return new List<CategoryResponse>();
+            return new PagedResponse<CategoryResponse>();
         }
-        
+
         var categories = await _repository.GetAllAsync(pageNumber,pageSize);
-        return categories.Select(c => new CategoryResponse()
+        
+        var items = categories.Items.Select(c => new CategoryResponse()
         {
             Id = c.Id,
             Name = c.Name
         }).ToList();
+
+        _logger.LogInformation("Returned {Count} categories out of {Total}", items.Count, categories.TotalCount);
+        
+        return new PagedResponse<CategoryResponse>()
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = categories.TotalCount
+        };
     }
 
     public async Task<CategoryResponse?> GetByIdAsync(int id)
@@ -39,7 +52,7 @@ public class CategoryService : ICategoryService
         if (category == null)
         {
             _logger.LogWarning("Category with ID {CategoryId} not found", id);
-            return null;
+            throw new CategoryNotFoundException(id);
         }
         return new CategoryResponse()
         {
@@ -75,7 +88,7 @@ public class CategoryService : ICategoryService
         if (category == null)
         {
             _logger.LogWarning("Category with {CategoryId} not found", id);
-            return null;
+            throw new CategoryNotFoundException(id);
         }
 
         category.Name = request.Name;
@@ -90,7 +103,7 @@ public class CategoryService : ICategoryService
         };
     }
 
-    public async Task<CategoryResponse?> DeleteAsync(int id)
+    public async Task<bool?> DeleteAsync(int id)
     {
         _logger.LogInformation("Deleting category with ID: {CategoryId}", id);
         
@@ -98,17 +111,13 @@ public class CategoryService : ICategoryService
         if (category == null)
         {
             _logger.LogWarning("Category with ID {CategoryId} not found", id);
-            return null;
+            throw new CategoryNotFoundException(id);
         }
 
         await _repository.DeleteAsync(id);
         
         _logger.LogInformation("Category deleted successfully with ID: {CategoryId}", id);
-        
-        return new CategoryResponse()
-        {
-            Id = category.Id,
-            Name = category.Name
-        };
+
+        return true;
     }
 }

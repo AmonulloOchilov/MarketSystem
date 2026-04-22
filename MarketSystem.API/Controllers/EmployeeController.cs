@@ -44,10 +44,7 @@ public class EmployeeController : ControllerBase
     public async Task<IActionResult> DeleteAsync(int id)
     {
         var result = await _service.DeleteAsync(id);
-        if (result == null)
-        {
-            return NotFound();
-        }
+        
         return Ok(result);
     }
 }

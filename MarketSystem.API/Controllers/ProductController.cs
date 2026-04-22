@@ -26,10 +26,6 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ProductResponse>> GetByIdAsync(int id)
     {
         var result = await _service.GetByIdAsync(id);
-        if (result == null)
-        {
-            return NotFound();
-        }
         
         return Ok(result);
     }
@@ -44,10 +40,6 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> UpdateAsync(int id, UpdateProductRequest request)
     {
         var result = await _service.UpdateAsync(id, request);
-        if (result == null)
-        {
-            return NotFound();
-        }
         
         return Ok(result);
     }
@@ -56,10 +48,7 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> DeleteAsync(int id)
     {
         var result = await _service.DeleteAsync(id);
-        if (result == null)
-        {
-            return NotFound();
-        }
+        
         return Ok(result);
     }
 }
