@@ -11,6 +11,7 @@ using Infrastructure.Repositories;
 using MarketSystem.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +20,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var elasticUsername = builder.Configuration["Elastic:Username"];
+var elasticPassword = builder.Configuration["Elastic:Password"];
+
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information().WriteTo.Console()
-    .WriteTo.File(path: "Logs/app-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+    {
+        IndexFormat = "market-logs-{0:yyyy.MM.dd}",
+        AutoRegisterTemplate = true,
+        ModifyConnectionSettings = x => x
+            .BasicAuthentication(elasticUsername, elasticPassword)
+    })
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+Log.Information("Test log from API");
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<MarketDbContext>(options =>
