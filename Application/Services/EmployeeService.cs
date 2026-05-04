@@ -37,6 +37,8 @@ public class EmployeeService : IEmployeeService
             Id = e.Id,
             FirstName = e.FirstName,
             LastName = e.LastName,
+            Username = e.Username,
+            Role = e.Role,
             Position = e.Position,
             Email = e.Email
         }).ToList();
@@ -67,6 +69,8 @@ public class EmployeeService : IEmployeeService
             Id = employee.Id,
             FirstName = employee.FirstName,
             LastName = employee.LastName,
+            Username = employee.Username,
+            Role = employee.Role,
             Position = employee.Position,
             Email = employee.Email
         };
@@ -81,6 +85,9 @@ public class EmployeeService : IEmployeeService
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
+            Username = request.Username,
+            Role = request.Role,
+            PasswordHash = request.Password,
             Position = request.Position,
             Email = request.Email
         };
@@ -94,6 +101,8 @@ public class EmployeeService : IEmployeeService
             Id = created.Id,
             FirstName = created.FirstName,
             LastName = created.LastName,
+            Username = created.Username,
+            Role = created.Role,
             Position = created.Position,
             Email = created.Email
         };
@@ -114,6 +123,8 @@ public class EmployeeService : IEmployeeService
         employee.Id = id;
         employee.FirstName = request.FirstName;
         employee.LastName = request.LastName;
+        employee.Username = request.Username;
+        employee.Role = request.Role;
         employee.Position = request.Position;
         
         var updated = await _repository.UpdateAsync(employee);
@@ -132,6 +143,8 @@ public class EmployeeService : IEmployeeService
             Id = updated.Id,
             FirstName = updated.FirstName,
             LastName = updated.LastName,
+            Username = updated.Username,
+            Role = updated.Role,
             Position = updated.Position,
             Email = updated.Email
         };
