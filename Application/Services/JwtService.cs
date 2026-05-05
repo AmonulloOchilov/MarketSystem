@@ -2,14 +2,22 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Domain.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Application.Services;
 
 public class JwtService
 {
-    private readonly string _key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
-
+    private readonly string _key;
+    private readonly string _issuer;
+    private readonly string _audience;
+    public JwtService(IConfiguration configuration)
+    {
+        _key = configuration["Jwt:Key"]!;
+        _issuer = configuration["Jwt:Issuer"]!;
+        _audience = configuration["Jwt:Audience"]!;
+    }
     public string GenerateToken(Person user)
     {
         var claims = new List<Claim>()
@@ -22,6 +30,8 @@ public class JwtService
         var creeds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
+            issuer: _issuer,
+            audience: _audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(30),
             signingCredentials: creeds

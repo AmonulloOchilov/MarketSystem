@@ -1,0 +1,126 @@
+2026-04-23 18:09:08.052 +03:00 [INF] Now listening on: https://localhost:5001
+2026-04-23 18:09:08.079 +03:00 [INF] Now listening on: http://localhost:5000
+2026-04-23 18:09:08.081 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-23 18:09:08.082 +03:00 [INF] Hosting environment: Development
+2026-04-23 18:09:08.082 +03:00 [INF] Content root path: /Users/amonulloochilov/Desktop/MarketSystem/MarketSystem.API
+2026-04-23 18:09:08.801 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger - null null
+2026-04-23 18:09:08.860 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger - 301 0 null 58.149ms
+2026-04-23 18:09:08.895 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/index.html - null null
+2026-04-23 18:09:09.010 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/index.html - 200 null text/html;charset=utf-8 115.3878ms
+2026-04-23 18:09:09.012 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/swagger-ui-standalone-preset.js - null null
+2026-04-23 18:09:09.041 +03:00 [INF] Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+2026-04-23 18:09:09.059 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/swagger-ui-standalone-preset.js - 200 230280 text/javascript 47.757ms
+2026-04-23 18:09:09.582 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - null null
+2026-04-23 18:09:09.691 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 109.0966ms
+2026-04-23 18:09:50.874 +03:00 [INF] Request starting HTTP/2 POST https://localhost:5001/api/Product - application/json 52
+2026-04-23 18:09:50.888 +03:00 [INF] Executing endpoint 'MarketSystem.API.Controllers.ProductController.CreateAsync (MarketSystem.API)'
+2026-04-23 18:09:50.911 +03:00 [INF] Route matched with {action = "Create", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] CreateAsync(Application.DTOs.Request.CreateProductRequest) on controller MarketSystem.API.Controllers.ProductController (MarketSystem.API).
+2026-04-23 18:09:51.090 +03:00 [INF] Executing action method MarketSystem.API.Controllers.ProductController.CreateAsync (MarketSystem.API) - Validation state: "Valid"
+2026-04-23 18:09:51.092 +03:00 [INF] Creating product: Nut
+2026-04-23 18:09:51.093 +03:00 [INF] Adding product to Database. Product ID: 0, Name Nut, Category ID 1
+2026-04-23 18:09:52.020 +03:00 [INF] Executed DbCommand (72ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Date), @p2='?', @p3='?' (DbType = Decimal), @p4='?' (DbType = Decimal)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Products" ("CategoryId", "ExpireDate", "Name", "Price", "Quantity")
+VALUES (@p0, @p1, @p2, @p3, @p4)
+RETURNING "Id";
+2026-04-23 18:09:52.058 +03:00 [INF] Product successfully created with ID: 15
+2026-04-23 18:09:52.058 +03:00 [INF] Product created successfully with ID: 15
+2026-04-23 18:09:52.062 +03:00 [INF] Executed action method MarketSystem.API.Controllers.ProductController.CreateAsync (MarketSystem.API), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 968.9602ms.
+2026-04-23 18:09:52.067 +03:00 [INF] Executing OkObjectResult, writing value of type 'Application.DTOs.Response.ProductResponse'.
+2026-04-23 18:09:52.081 +03:00 [INF] Executed action MarketSystem.API.Controllers.ProductController.CreateAsync (MarketSystem.API) in 1167.3112ms
+2026-04-23 18:09:52.082 +03:00 [INF] Executed endpoint 'MarketSystem.API.Controllers.ProductController.CreateAsync (MarketSystem.API)'
+2026-04-23 18:09:52.092 +03:00 [INF] Request finished HTTP/2 POST https://localhost:5001/api/Product - 200 null application/json; charset=utf-8 1219.5951ms
+2026-04-23 18:12:35.892 +03:00 [INF] Request starting HTTP/2 PUT https://localhost:5001/api/Product/15 - application/json 61
+2026-04-23 18:12:35.895 +03:00 [INF] Executing endpoint 'MarketSystem.API.Controllers.ProductController.UpdateAsync (MarketSystem.API)'
+2026-04-23 18:12:35.899 +03:00 [INF] Route matched with {action = "Update", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] UpdateAsync(Int32, Application.DTOs.Request.UpdateProductRequest) on controller MarketSystem.API.Controllers.ProductController (MarketSystem.API).
+2026-04-23 18:12:35.911 +03:00 [INF] Executing action method MarketSystem.API.Controllers.ProductController.UpdateAsync (MarketSystem.API) - Validation state: "Valid"
+2026-04-23 18:12:35.913 +03:00 [INF] Updating product with ID: 15
+2026-04-23 18:12:36.187 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT p."Id", p."CategoryId", p."ExpireDate", p."Name", p."Price", p."Quantity", c."Id", c."Name"
+FROM "Products" AS p
+INNER JOIN "Categories" AS c ON p."CategoryId" = c."Id"
+WHERE p."Id" = @__id_0
+LIMIT 1
+2026-04-23 18:12:36.208 +03:00 [INF] Updating product. ProductId: 15
+2026-04-23 18:12:36.217 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?', @p1='?' (DbType = Decimal)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Products" SET "Name" = @p0, "Price" = @p1
+WHERE "Id" = @p2;
+2026-04-23 18:12:36.218 +03:00 [INF] Product 15 updated successfully. Name: Greece Nut, Price: 4.5
+2026-04-23 18:12:36.218 +03:00 [INF] Executed action method MarketSystem.API.Controllers.ProductController.UpdateAsync (MarketSystem.API), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 306.655ms.
+2026-04-23 18:12:36.218 +03:00 [INF] Executing OkObjectResult, writing value of type 'Application.DTOs.Response.ProductResponse'.
+2026-04-23 18:12:36.219 +03:00 [INF] Executed action MarketSystem.API.Controllers.ProductController.UpdateAsync (MarketSystem.API) in 319.623ms
+2026-04-23 18:12:36.219 +03:00 [INF] Executed endpoint 'MarketSystem.API.Controllers.ProductController.UpdateAsync (MarketSystem.API)'
+2026-04-23 18:12:36.219 +03:00 [INF] Request finished HTTP/2 PUT https://localhost:5001/api/Product/15 - 200 null application/json; charset=utf-8 327.0368ms
+2026-04-23 18:13:31.534 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/api/Product/15 - null null
+2026-04-23 18:13:31.538 +03:00 [INF] Executing endpoint 'MarketSystem.API.Controllers.ProductController.GetByIdAsync (MarketSystem.API)'
+2026-04-23 18:13:31.546 +03:00 [INF] Route matched with {action = "GetById", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Application.DTOs.Response.ProductResponse]] GetByIdAsync(Int32) on controller MarketSystem.API.Controllers.ProductController (MarketSystem.API).
+2026-04-23 18:13:31.550 +03:00 [INF] Executing action method MarketSystem.API.Controllers.ProductController.GetByIdAsync (MarketSystem.API) - Validation state: "Valid"
+2026-04-23 18:13:31.565 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT p."Id", p."CategoryId", p."ExpireDate", p."Name", p."Price", p."Quantity", c."Id", c."Name"
+FROM "Products" AS p
+INNER JOIN "Categories" AS c ON p."CategoryId" = c."Id"
+WHERE p."Id" = @__id_0
+LIMIT 1
+2026-04-23 18:13:31.567 +03:00 [INF] Executed action method MarketSystem.API.Controllers.ProductController.GetByIdAsync (MarketSystem.API), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 17.3331ms.
+2026-04-23 18:13:31.568 +03:00 [INF] Executing OkObjectResult, writing value of type 'Application.DTOs.Response.ProductResponse'.
+2026-04-23 18:13:31.568 +03:00 [INF] Executed action MarketSystem.API.Controllers.ProductController.GetByIdAsync (MarketSystem.API) in 22.4652ms
+2026-04-23 18:13:31.568 +03:00 [INF] Executed endpoint 'MarketSystem.API.Controllers.ProductController.GetByIdAsync (MarketSystem.API)'
+2026-04-23 18:13:31.569 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/api/Product/15 - 200 null application/json; charset=utf-8 34.3687ms
+2026-04-23 18:13:44.905 +03:00 [INF] Application is shutting down...
+2026-04-23 18:13:51.135 +03:00 [INF] Now listening on: https://localhost:5001
+2026-04-23 18:13:51.158 +03:00 [INF] Now listening on: http://localhost:5000
+2026-04-23 18:13:51.160 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-23 18:13:51.160 +03:00 [INF] Hosting environment: Development
+2026-04-23 18:13:51.160 +03:00 [INF] Content root path: /Users/amonulloochilov/Desktop/MarketSystem/MarketSystem.API
+2026-04-23 18:13:51.505 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/index.html - null null
+2026-04-23 18:13:51.634 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/index.html - 200 null text/html;charset=utf-8 129.773ms
+2026-04-23 18:13:51.755 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - null null
+2026-04-23 18:13:51.877 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 121.6778ms
+2026-04-23 18:14:12.381 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/api/Category?pageNumber=1&pageSize=10 - null null
+2026-04-23 18:14:12.391 +03:00 [INF] Executing endpoint 'MarketSystem.API.Controllers.CategoryController.GetAllAsync (MarketSystem.API)'
+2026-04-23 18:14:12.409 +03:00 [INF] Route matched with {action = "GetAll", controller = "Category"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Application.DTOs.Response.CategoryResponse]] GetAllAsync(Int32, Int32) on controller MarketSystem.API.Controllers.CategoryController (MarketSystem.API).
+2026-04-23 18:14:12.540 +03:00 [INF] Executing action method MarketSystem.API.Controllers.CategoryController.GetAllAsync (MarketSystem.API) - Validation state: "Valid"
+2026-04-23 18:14:12.542 +03:00 [INF] Fetching categories. Page: 1, Size: 10
+2026-04-23 18:14:13.472 +03:00 [INF] Executed DbCommand (25ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-04-23 18:14:13.630 +03:00 [INF] Executed DbCommand (15ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+ORDER BY c."Id"
+LIMIT @__p_1 OFFSET @__p_0
+2026-04-23 18:14:13.666 +03:00 [INF] Returned 2 categories out of 2
+2026-04-23 18:14:13.669 +03:00 [INF] Executed action method MarketSystem.API.Controllers.CategoryController.GetAllAsync (MarketSystem.API), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 1126.52ms.
+2026-04-23 18:14:13.676 +03:00 [INF] Executing OkObjectResult, writing value of type 'Application.Common.PagedResponse`1[[Application.DTOs.Response.CategoryResponse, Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-04-23 18:14:13.708 +03:00 [INF] Executed action MarketSystem.API.Controllers.CategoryController.GetAllAsync (MarketSystem.API) in 1296.4888ms
+2026-04-23 18:14:13.709 +03:00 [INF] Executed endpoint 'MarketSystem.API.Controllers.CategoryController.GetAllAsync (MarketSystem.API)'
+2026-04-23 18:14:13.720 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/api/Category?pageNumber=1&pageSize=10 - 200 null application/json; charset=utf-8 1338.7849ms
+2026-04-23 18:14:41.611 +03:00 [INF] Application is shutting down...
+2026-04-23 18:16:13.477 +03:00 [INF] Now listening on: https://localhost:5001
+2026-04-23 18:16:13.504 +03:00 [INF] Now listening on: http://localhost:5000
+2026-04-23 18:16:13.506 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-23 18:16:13.506 +03:00 [INF] Hosting environment: Development
+2026-04-23 18:16:13.506 +03:00 [INF] Content root path: /Users/amonulloochilov/Desktop/MarketSystem/MarketSystem.API
+2026-04-23 18:16:13.981 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/index.html - null null
+2026-04-23 18:16:14.125 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/index.html - 200 null text/html;charset=utf-8 142.0982ms
+2026-04-23 18:16:14.283 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - null null
+2026-04-23 18:16:14.412 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 128.6477ms
+2026-04-23 18:16:41.293 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/api/Customer?pageNumber=1&pageSize=10 - null null
+2026-04-23 18:16:41.303 +03:00 [INF] Executing endpoint 'MarketSystem.API.Controllers.CustomerController.GetAllAsync (MarketSystem.API)'
+2026-04-23 18:16:41.325 +03:00 [INF] Route matched with {action = "GetAll", controller = "Customer"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Application.DTOs.Response.CustomerResponse]] GetAllAsync(Int32, Int32) on controller MarketSystem.API.Controllers.CustomerController (MarketSystem.API).
+2026-04-23 18:16:41.457 +03:00 [INF] Executing action method MarketSystem.API.Controllers.CustomerController.GetAllAsync (MarketSystem.API) - Validation state: "Valid"
+2026-04-23 18:16:41.459 +03:00 [INF] Fetching employees. Page: 1, Size: 10
+2026-04-23 18:16:42.418 +03:00 [INF] Executed DbCommand (24ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Customers" AS c
+2026-04-23 18:16:42.573 +03:00 [INF] Executed DbCommand (14ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Email", c."FirstName", c."LastName", c."PhoneNumber"
+FROM "Customers" AS c
+ORDER BY c."Id"
+LIMIT @__p_1 OFFSET @__p_0
+2026-04-23 18:16:42.606 +03:00 [INF] Returned 1 customers out of 1
+2026-04-23 18:16:42.610 +03:00 [INF] Executed action method MarketSystem.API.Controllers.CustomerController.GetAllAsync (MarketSystem.API), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 1149.9616ms.
+2026-04-23 18:16:42.617 +03:00 [INF] Executing OkObjectResult, writing value of type 'Application.Common.PagedResponse`1[[Application.DTOs.Response.CustomerResponse, Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-04-23 18:16:42.648 +03:00 [INF] Executed action MarketSystem.API.Controllers.CustomerController.GetAllAsync (MarketSystem.API) in 1319.9613ms
+2026-04-23 18:16:42.649 +03:00 [INF] Executed endpoint 'MarketSystem.API.Controllers.CustomerController.GetAllAsync (MarketSystem.API)'
+2026-04-23 18:16:42.660 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/api/Customer?pageNumber=1&pageSize=10 - 200 null application/json; charset=utf-8 1367.7198ms
+2026-04-23 18:16:53.781 +03:00 [INF] Application is shutting down...

@@ -56,7 +56,8 @@ public class AuthService : IAuthService
         return new TokenResponse()
         {
             AccessToken = accessToken,
-            RefreshToken = refreshToken.Token
+            RefreshToken = refreshToken.Token,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(30)
         };
     }
 
