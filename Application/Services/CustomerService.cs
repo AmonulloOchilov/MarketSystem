@@ -85,7 +85,7 @@ public class CustomerService : ICustomerService
             LastName = request.LastName,
             Username = request.Username,
             Role = request.Role,
-            PasswordHash = request.Password,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Email = request.Email,
             PhoneNumber = request.PhoneNumber
         };

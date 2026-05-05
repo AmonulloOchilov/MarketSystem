@@ -87,7 +87,7 @@ public class EmployeeService : IEmployeeService
             LastName = request.LastName,
             Username = request.Username,
             Role = request.Role,
-            PasswordHash = request.Password,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Position = request.Position,
             Email = request.Email
         };
