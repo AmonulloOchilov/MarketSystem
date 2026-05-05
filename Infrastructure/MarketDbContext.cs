@@ -12,6 +12,8 @@ public class MarketDbContext : DbContext
     public DbSet<Admin> Admins { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Person> Persons { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public MarketDbContext(DbContextOptions<MarketDbContext> options) : base(options)
     {

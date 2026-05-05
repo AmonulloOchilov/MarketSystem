@@ -35,6 +35,8 @@ public class CustomerService : ICustomerService
             Id = c.Id,
             FirstName = c.FirstName,
             LastName = c.LastName,
+            Username = c.Username,
+            Role = c.Role,
             Email = c.Email,
             PhoneNumber = c.PhoneNumber
         }).ToList();
@@ -65,6 +67,8 @@ public class CustomerService : ICustomerService
             Id = customer.Id,
             FirstName = customer.FirstName,
             LastName = customer.LastName,
+            Username = customer.Username,
+            Role = customer.Role,
             Email = customer.Email,
             PhoneNumber = customer.PhoneNumber
         };
@@ -79,6 +83,9 @@ public class CustomerService : ICustomerService
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
+            Username = request.Username,
+            Role = request.Role,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Email = request.Email,
             PhoneNumber = request.PhoneNumber
         };
@@ -92,6 +99,8 @@ public class CustomerService : ICustomerService
             Id = created.Id,
             FirstName = created.FirstName,
             LastName = created.LastName,
+            Username = created.Username,
+            Role = created.Role,
             Email = created.Email,
             PhoneNumber = created.PhoneNumber
         };
@@ -111,6 +120,8 @@ public class CustomerService : ICustomerService
 
         customer.FirstName = request.FirstName;
         customer.LastName = request.LastName;
+        customer.Username = request.Username;
+        customer.Role = request.Role;
         customer.Email = request.Email;
         customer.PhoneNumber = request.PhoneNumber;
 
@@ -125,6 +136,8 @@ public class CustomerService : ICustomerService
             Id = updated.Id,
             FirstName = updated.FirstName,
             LastName = updated.LastName,
+            Username = updated.Username,
+            Role = updated.Role,
             Email = updated.Email,
             PhoneNumber = updated.PhoneNumber
         };
@@ -147,7 +160,7 @@ public class CustomerService : ICustomerService
         _logger.LogInformation(
             "Customer deleted successfully. ID: {CustomerId}, Name: {CustomerName}, Surname: {CustomerSurname}", id,
             customer.FirstName, customer.LastName);
-
+        
         return true;
     }
 }
