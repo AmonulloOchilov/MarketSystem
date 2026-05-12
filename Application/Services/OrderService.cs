@@ -48,13 +48,15 @@ public class OrderService : IOrderService
         {
             Id = o.Id,
             CustomerId = o.CustomerId,
+            EmployeeId = o.EmployeeId,
             CreatedAt = o.CreatedAt,
             Status = o.Status,
             Items = o.OrderItems.Select(i => new OrderItemResponse()
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                Price = i.Price
+                Price = i.Price,
+                TotalPrice = i.Quantity * i.Price
             }).ToList()
 
         }).ToList();
@@ -166,7 +168,8 @@ public class OrderService : IOrderService
                 {
                     ProductId = oi.ProductId,
                     Quantity = oi.Quantity,
-                    Price = oi.Price
+                    Price = oi.Price,
+                    TotalPrice = oi.Quantity * oi.Price
                 }).ToList()
             };
             return response;
@@ -183,6 +186,8 @@ public class OrderService : IOrderService
 
     public async Task<PaymentResponse> PayOrderAsync(int orderId, decimal amountPaid)
     {
+        _logger.LogInformation("Processing payment for Order {OrderId}", orderId);
+        
         var order = await _orderRepository.GetByIdAsync(orderId);
         
         if (order == null)
@@ -198,7 +203,7 @@ public class OrderService : IOrderService
         var total = order.OrderItems.Sum(i => i.Price * i.Quantity);
         if (amountPaid < total)
         {
-            throw new Exception("Not enough money");
+            throw new InsufficientPaymentException(amountPaid, total);
         }
 
         var change = amountPaid - total;
@@ -270,6 +275,8 @@ public class OrderService : IOrderService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
+            _logger.LogInformation("Cancelling Order {OrderId}", orderId);
+            
             order.Status = OrderStatus.Cancelled;
             await _orderRepository.UpdateAsync(order);
 
@@ -296,13 +303,15 @@ public class OrderService : IOrderService
         {
             Id = order.Id,
             CustomerId = order.CustomerId,
+            EmployeeId = order.EmployeeId,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
             Items = order.OrderItems.Select(i => new OrderItemResponse
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                Price = i.Price
+                Price = i.Price,
+                TotalPrice = i.Quantity * i.Price
             }).ToList()
         };
     }
