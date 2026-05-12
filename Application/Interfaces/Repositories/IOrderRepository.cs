@@ -7,6 +7,7 @@ public interface IOrderRepository
 {
     Task<PagedResult<Order>> GetAllAsync(int pageNumber, int pageSize);
     Task<Order> CreateAsync(Order order);
-
     Task<Order?> GetByIdAsync(int id);
+    Task UpdateAsync(Order order);
+    Task<bool> AnyOrderContainsProductAsync(int productId);
 }

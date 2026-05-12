@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MarketSystem.API.Controllers;
 [ApiController]
-[Route("/api/[controller]")]
+[Route("api/[controller]")]
 [Authorize(Roles = "Admin,Customer,Employee")]
 public class OrderController : ControllerBase
 {
@@ -34,5 +34,19 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> CreateAsync(CreateOrderRequest request)
     {
         return Ok(await _service.CreateAsync(request));
+    }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelAsync(int id)
+    {
+        await _service.CancelOrderAsync(id);
+        return NoContent();
+    }
+
+    [HttpPost("{id}/pay")]
+    public async Task<IActionResult> PayAsync(int id, PayOrderRequest request)
+    {
+        var result = await _service.PayOrderAsync(id, request.AmountPaid);
+        return Ok(result);
     }
 }

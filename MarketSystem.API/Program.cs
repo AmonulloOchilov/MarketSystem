@@ -1,6 +1,7 @@
 using System.Text;
 using Application.DTOs.Request;
 using Application.Interfaces;
+using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using Application.Validators.Product;
@@ -8,6 +9,7 @@ using Domain.Entities;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
+using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using MarketSystem.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
@@ -123,6 +125,8 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
