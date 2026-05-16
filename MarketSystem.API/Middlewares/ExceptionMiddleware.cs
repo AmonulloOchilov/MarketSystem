@@ -25,9 +25,6 @@ public class ExceptionMiddleware : IMiddleware
             if (e is BaseException baseException)
             {
                 context.Response.StatusCode = baseException.StatusCode;
-                
-                context.Response.Clear();
-                
                 await context.Response.WriteAsJsonAsync(new
                 {
                     statusCode = baseException.StatusCode,
@@ -37,10 +34,7 @@ public class ExceptionMiddleware : IMiddleware
             
             else
             {
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError; 
-                
-                context.Response.Clear();
-                
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsJsonAsync(new
                 {
                     message = "Internal server error"

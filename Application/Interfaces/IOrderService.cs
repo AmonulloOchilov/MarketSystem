@@ -9,6 +9,4 @@ public interface IOrderService
     Task<PagedResponse<OrderResponse>> GetAllAsync(int pageNumber, int pageSize);
     Task<OrderResponse> CreateAsync(CreateOrderRequest request);
     Task<OrderResponse?> GetByIdAsync(int id);
-    Task<PaymentResponse> PayOrderAsync(int id, decimal amountPaid);
-    Task CancelOrderAsync(int id);
 }

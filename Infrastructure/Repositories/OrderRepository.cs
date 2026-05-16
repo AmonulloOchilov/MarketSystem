@@ -40,6 +40,7 @@ public class OrderRepository:IOrderRepository
             order.Id, order.CustomerId, order.OrderItems);
         
         await _db.Orders.AddAsync(order);
+        await _db.SaveChangesAsync();
         
         _logger.LogInformation("Order successfully created with ID: {OrderId}", order.Id);
         return order;
@@ -50,18 +51,11 @@ public class OrderRepository:IOrderRepository
         var result = await _db.Orders
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == id);
-        
+        if (result == null)
+        {
+            _logger.LogWarning("Order not found in database. Order ID: {ProductId}", id);
+            throw new OrderNotFoundException(id);
+        }
         return result;
-    }
-
-    public Task UpdateAsync(Order order)
-    {
-        _db.Orders.Update(order);
-        return Task.CompletedTask;
-    }
-
-    public async Task<bool> AnyOrderContainsProductAsync(int productId)
-    {
-        return await _db.Orders.AnyAsync(o => o.OrderItems.Any(oi => oi.ProductId == productId));
     }
 }

@@ -13,13 +13,11 @@ public class ProductService : IProductService
 {
     private readonly IProductRepository _repository;
     private readonly ILogger<ProductService> _logger;
-    private readonly IOrderRepository _orderRepository;
 
-    public ProductService(IProductRepository repository, ILogger<ProductService> logger, IOrderRepository orderRepository)
+    public ProductService(IProductRepository repository, ILogger<ProductService> logger)
     {
         _repository = repository;
         _logger = logger;
-        _orderRepository = orderRepository;
     }
     
     public async Task<PagedResponse<ProductResponse>> GetAllAsync(int pageNumber, int pageSize)
@@ -37,7 +35,6 @@ public class ProductService : IProductService
             Id = p.Id,
             Name = p.Name,
             Price = p.Price,
-            Stock = p.Stock,
             CategoryId = p.CategoryId
         }).ToList();
         
@@ -66,7 +63,6 @@ public class ProductService : IProductService
             Id = product.Id,
             Name = product.Name,
             Price = product.Price,
-            Stock = product.Stock,
             CategoryId = product.CategoryId
         };
     }
@@ -79,7 +75,6 @@ public class ProductService : IProductService
         {
             Name = request.Name,
             Price = request.Price,
-            Stock = request.Stock,
             CategoryId = request.CategoryId
         };
         var createdProduct = await _repository.AddAsync(product);
@@ -91,7 +86,6 @@ public class ProductService : IProductService
             Id = createdProduct.Id,
             Name = createdProduct.Name,
             Price = createdProduct.Price,
-            Stock = createdProduct.Stock,
             CategoryId = createdProduct.CategoryId
         };
     }
@@ -109,7 +103,6 @@ public class ProductService : IProductService
 
         product.Name = request.Name;
         product.Price = request.Price;
-        product.Stock = request.Stock;
         product.CategoryId = request.CategoryId;
 
         var updated = await _repository.UpdateAsync(product);
@@ -122,19 +115,12 @@ public class ProductService : IProductService
             Id = updated.Id,
             Name = updated.Name,
             Price = updated.Price,
-            Stock = updated.Stock,
             CategoryId = updated.CategoryId
         };
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var isUsed = await _orderRepository.AnyOrderContainsProductAsync(id);
-        
-        if (isUsed)
-        {
-            throw new ProductInUseException(id);
-        }
         _logger.LogInformation("Deleting product with ID: {ProductId}", id);
         
         var product = await _repository.GetByIdAsync(id);
