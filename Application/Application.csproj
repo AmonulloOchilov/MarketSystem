@@ -13,11 +13,26 @@
     <ItemGroup>
       <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+      <PackageReference Include="MediatR" Version="14.1.0" />
+      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.26" />
       <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
       <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
       <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Features\Admins\Commands\" />
+      <Folder Include="Features\Admins\Queries\" />
+      <Folder Include="Features\Categories\Commands\" />
+      <Folder Include="Features\Categories\Queries\" />
+      <Folder Include="Features\Customers\Commands\" />
+      <Folder Include="Features\Customers\Queries\" />
+      <Folder Include="Features\Employees\Commands\" />
+      <Folder Include="Features\Employees\Queries\" />
+      <Folder Include="Features\Products\Commands\" />
+      <Folder Include="Features\Products\Queries\" />
     </ItemGroup>
 
 </Project>

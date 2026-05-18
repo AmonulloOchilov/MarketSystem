@@ -1,6 +1,11 @@
 using Application.DTOs.Request;
 using Application.DTOs.Response;
-using Application.Interfaces;
+using Application.Features.Orders.Commands.CancelOrder;
+using Application.Features.Orders.Commands.CreateOrder;
+using Application.Features.Orders.Commands.PayOrder;
+using Application.Features.Orders.Queries.GetAllOrders;
+using Application.Features.Orders.Queries.GetOrderById;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,43 +15,45 @@ namespace MarketSystem.API.Controllers;
 [Authorize(Roles = "Admin,Customer,Employee")]
 public class OrderController : ControllerBase
 {
-    private readonly IOrderService _service;
-
-    public OrderController(IOrderService service)
+    private readonly IMediator _mediator;
+    public OrderController(IMediator mediator)
     {
-        _service = service;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<OrderResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
+        var result = await _mediator.Send(new GetAllOrdersQuery(pageNumber, pageSize));
+        return Ok(result);
     }
     
     [HttpGet("{id}")]
     public async Task<ActionResult<OrderResponse>> GetByIdAsync(int id)
     {
-        return Ok(await _service.GetByIdAsync(id));
+        var result = await _mediator.Send(new GetOrderByIdQuery(id));
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync(CreateOrderRequest request)
     {
-        return Ok(await _service.CreateAsync(request));
+        var result = await _mediator.Send(new CreateOrderCommand(request));
+        return Ok(result);
     }
 
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> CancelAsync(int id)
     {
-        await _service.CancelOrderAsync(id);
+        await _mediator.Send(new CancelOrderCommand(id));
         return NoContent();
     }
 
     [HttpPost("{id}/pay")]
     public async Task<IActionResult> PayAsync(int id, PayOrderRequest request)
     {
-        var result = await _service.PayOrderAsync(id, request.AmountPaid);
+        var result = await _mediator.Send(new PayOrderCommand(id, request.AmountPaid));
         return Ok(result);
     }
 }

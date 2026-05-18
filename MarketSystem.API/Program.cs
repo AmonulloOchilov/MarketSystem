@@ -1,4 +1,5 @@
 using System.Text;
+using Application;
 using Application.DTOs.Request;
 using Application.Interfaces;
 using Application.Interfaces.Persistence;
@@ -127,6 +128,8 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
 
 var app = builder.Build();
 
