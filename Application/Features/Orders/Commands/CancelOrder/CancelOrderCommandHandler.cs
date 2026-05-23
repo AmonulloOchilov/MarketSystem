@@ -1,6 +1,5 @@
 using Application.Exceptions;
-using Application.Interfaces.Persistence;
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Data;
 using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -9,21 +8,18 @@ namespace Application.Features.Orders.Commands.CancelOrder;
 
 public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand>
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IAppDbContext _dbContext;
     private readonly ILogger<CancelOrderCommandHandler> _logger;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public CancelOrderCommandHandler(IOrderRepository orderRepository, ILogger<CancelOrderCommandHandler> logger,
-        IUnitOfWork unitOfWork)
+    public CancelOrderCommandHandler(IAppDbContext dbContext, ILogger<CancelOrderCommandHandler> logger)
     {
-        _orderRepository = orderRepository;
+        _dbContext = dbContext;
         _logger = logger;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(CancelOrderCommand request, CancellationToken cancellationToken)
     {
-        var order = await _orderRepository.GetByIdAsync(request.OrderId);
+        var order = await _dbContext.Orders.FindAsync(request.OrderId);
         
         if (order == null)
         {
@@ -45,19 +41,19 @@ public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand>
             throw new InvalidOrderException("Only pending orders can be cancelled");
         }
 
-        await _unitOfWork.BeginTransactionAsync();
         try
         {
             _logger.LogInformation("Cancelling Order {OrderId}", request.OrderId);
             
             order.Status = OrderStatus.Cancelled;
-            await _orderRepository.UpdateAsync(order);
+            
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _unitOfWork.CommitAsync();
         }
-        catch
+        catch(Exception ex)
         {
-            await _unitOfWork.RollbackAsync();
+            _logger.LogError(ex, "Error occured while cancelling order for Order ID: {OrderId}",
+                request.OrderId);
             throw;
         }
     }

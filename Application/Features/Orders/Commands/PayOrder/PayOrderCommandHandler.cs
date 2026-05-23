@@ -1,33 +1,30 @@
 using Application.DTOs.Response;
 using Application.Exceptions;
-using Application.Interfaces;
-using Application.Interfaces.Persistence;
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Data;
 using Domain.Enums;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Orders.Commands.PayOrder;
 
 public class PayOrderCommandHandler : IRequestHandler<PayOrderCommand, PaymentResponse>
 {
-    private readonly IOrderRepository _orderRepository;
-    private readonly IProductRepository _productRepository;
+    private readonly IAppDbContext _dbContext;
     private readonly ILogger<PayOrderCommandHandler> _logger;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public PayOrderCommandHandler(IOrderRepository orderRepository, IProductRepository productRepository, ILogger<PayOrderCommandHandler> logger, IUnitOfWork unitOfWork)
+    public PayOrderCommandHandler(IAppDbContext dbContext, ILogger<PayOrderCommandHandler> logger)
     {
-        _orderRepository = orderRepository;
+        _dbContext = dbContext;
         _logger = logger;
-        _unitOfWork = unitOfWork;
-        _productRepository = productRepository;
     }
     public async Task<PaymentResponse> Handle(PayOrderCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Processing payment for Order {OrderId}", request.OrderId);
-        
-        var order = await _orderRepository.GetByIdAsync(request.OrderId);
+
+        var order = await _dbContext.Orders
+            .Include(oi => oi.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
         
         if (order == null)
         {
@@ -47,12 +44,11 @@ public class PayOrderCommandHandler : IRequestHandler<PayOrderCommand, PaymentRe
 
         var change = request.AmountPaid - total;
 
-        await _unitOfWork.BeginTransactionAsync();
         try
         {
             foreach (var item in order.OrderItems)
             {
-                var product = await _productRepository.GetByIdAsync(item.ProductId);
+                var product = await _dbContext.Products.FindAsync(item.ProductId);
                 
                 if (product == null)
                 {
@@ -65,13 +61,11 @@ public class PayOrderCommandHandler : IRequestHandler<PayOrderCommand, PaymentRe
                 }
                 
                 product.Stock -= item.Quantity;
-                await _productRepository.UpdateAsync(product);
             }
 
             order.Status = OrderStatus.Paid;
-            await _orderRepository.UpdateAsync(order);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _unitOfWork.CommitAsync();
 
             return new PaymentResponse()
             {
@@ -80,9 +74,10 @@ public class PayOrderCommandHandler : IRequestHandler<PayOrderCommand, PaymentRe
                 Change = change
             };
         }
-        catch
+        catch(Exception ex)
         {
-            await _unitOfWork.RollbackAsync();
+            _logger.LogError(ex, "Error occured while paying order for Customer ID: {CustomerId}",
+                order.CustomerId);
             throw;
         }
     }

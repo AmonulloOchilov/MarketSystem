@@ -1,19 +1,20 @@
 using Application.Common;
 using Application.DTOs.Response;
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Orders.Queries.GetAllOrders;
 
 public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, PagedResponse<OrderResponse>>
 {
-    private readonly IOrderRepository _repository;
+    private readonly IAppDbContext _dbContext;
     private readonly ILogger<GetAllOrdersQueryHandler> _logger;
 
-    public GetAllOrdersQueryHandler(IOrderRepository repository, ILogger<GetAllOrdersQueryHandler> logger)
+    public GetAllOrdersQueryHandler(IAppDbContext dbContext, ILogger<GetAllOrdersQueryHandler> logger)
     {
-        _repository = repository;
+        _dbContext = dbContext;
         _logger = logger;
     }
     
@@ -28,9 +29,18 @@ public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, Paged
             return new PagedResponse<OrderResponse>();
         }
 
-        var orders = await _repository.GetAllAsync(request.PageNumber, request.PageSize);
+        var query = _dbContext.Orders
+            .Include(o => o.OrderItems)
+            .OrderByDescending(o => o.CreatedAt);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var orders = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
         
-        var items = orders.Items.Select(o => new OrderResponse()
+        var items = orders.Select(o => new OrderResponse()
         {
             Id = o.Id,
             CustomerId = o.CustomerId,
@@ -47,14 +57,14 @@ public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, Paged
 
         }).ToList();
 
-        _logger.LogInformation("Returned {Count} orders out of {Total}", items.Count, orders.TotalCount);
+        _logger.LogInformation("Returned {Count} orders out of {Total}", items.Count, totalCount);
         
         return new PagedResponse<OrderResponse>()
         {
             Items = items,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize,
-            TotalCount = orders.TotalCount
+            TotalCount = totalCount
         };
     }
 }

@@ -1,12 +1,11 @@
 using System.Text;
 using Application;
-using Application.DTOs.Request;
 using Application.Interfaces;
+using Application.Interfaces.Data;
 using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using Application.Validators.Product;
-using Domain.Entities;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
@@ -47,6 +46,7 @@ builder.Services.AddDbContext<MarketDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
 });
+builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<MarketDbContext>());
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();

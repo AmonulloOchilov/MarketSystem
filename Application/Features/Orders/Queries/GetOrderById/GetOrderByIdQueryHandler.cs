@@ -1,25 +1,27 @@
 using Application.DTOs.Response;
 using Application.Exceptions;
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Orders.Queries.GetOrderById;
 
 public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, OrderResponse>
 {
-    private readonly IOrderRepository _repository;
+    private readonly IAppDbContext _dbContext;
     private readonly ILogger<GetOrderByIdQueryHandler> _logger;
 
-    public GetOrderByIdQueryHandler(IOrderRepository repository, ILogger<GetOrderByIdQueryHandler> logger)
+    public GetOrderByIdQueryHandler(IAppDbContext dbContext, ILogger<GetOrderByIdQueryHandler> logger)
     {
-        _repository = repository;
+        _dbContext = dbContext;
         _logger = logger;
     }
     
-    public async Task<OrderResponse?> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
+    public async Task<OrderResponse> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
     {
-        var order = await _repository.GetByIdAsync(request.OrderId);
+        var order = await _dbContext.Orders.Include(oi => oi.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order == null)
         {

@@ -1,35 +1,25 @@
 using Application.DTOs.Response;
 using Application.Exceptions;
-using Application.Interfaces;
+using Application.Interfaces.Data;
 using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Serilog;
 
 namespace Application.Features.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, OrderResponse>
 {
-    private readonly IOrderRepository _orderRepository;
-    private readonly ICustomerRepository _customerRepository;
-    private readonly IEmployeeRepository _employeeRepository;
-    private readonly IProductRepository _productRepository;
+    private readonly IAppDbContext _dbContext;
     private readonly ILogger<CreateOrderCommandHandler> _logger;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateOrderCommandHandler(IOrderRepository orderRepository, ICustomerRepository customerRepository,
-        IEmployeeRepository employeeRepository, IProductRepository productRepository,
-        ILogger<CreateOrderCommandHandler> logger, IUnitOfWork unitOfWork)
+    public CreateOrderCommandHandler(IAppDbContext dbContext,
+        ILogger<CreateOrderCommandHandler> logger)
     {
-        _orderRepository = orderRepository;
-        _customerRepository = customerRepository;
-        _employeeRepository = employeeRepository;
-        _productRepository = productRepository;
+        _dbContext = dbContext;
         _logger = logger;
-        _unitOfWork = unitOfWork;
     }
     
     public async Task<OrderResponse> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -48,21 +38,19 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             throw new DuplicateProductException();
         }
 
-        var customer = await _customerRepository.GetByIdAsync(request.Request.CustomerId);
+        var customer = await _dbContext.Customers.FindAsync(request.Request.CustomerId);
         if (customer == null)
         {
             _logger.LogWarning("Customer with ID {CustomerId} not found", request.Request.CustomerId);
             throw new CustomerNotFoundException(request.Request.CustomerId);
         }
 
-        var employee = await _employeeRepository.GetByIdAsync(request.Request.EmployeeId);
+        var employee = await _dbContext.Employees.FindAsync(request.Request.EmployeeId);
         if (employee == null)
         {
             _logger.LogWarning("Employee with ID {EmployeeId} not found", request.Request.EmployeeId);
             throw new EmployeeNotFoundException(request.Request.EmployeeId);
         }
-        
-        await _unitOfWork.BeginTransactionAsync();
         
         try
         {
@@ -78,7 +66,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
                     
             foreach (var item in request.Request.Items)
             {
-                var product = await _productRepository.GetByIdAsync(item.ProductId);
+                var product = await _dbContext.Products.FindAsync(item.ProductId);
                 if (product == null)
                 {
                     _logger.LogWarning("Product with ID {ProductId} not found while creating order", item.ProductId);
@@ -111,20 +99,20 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             }
             _logger.LogInformation("Order contains {ItemCount} items", order.OrderItems.Count);
             
-            var created = await _orderRepository.CreateAsync(order);
+            await _dbContext.Orders.AddAsync(order, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
                     
-            _logger.LogInformation("Order created successfully with ID: {OrderId}", created.Id);
+            _logger.LogInformation("Order created successfully with ID: {OrderId}", order.Id);
             
-            await _unitOfWork.CommitAsync();
             
             var response = new OrderResponse
             {
-                Id = created.Id,
-                CustomerId = created.CustomerId,
-                EmployeeId = created.EmployeeId,
-                CreatedAt = created.CreatedAt,
+                Id = order.Id,
+                CustomerId = request.Request.CustomerId,
+                EmployeeId = request.Request.EmployeeId,
+                CreatedAt = order.CreatedAt,
                 Status = OrderStatus.Pending,
-                Items = created.OrderItems.Select(oi=> new OrderItemResponse()
+                Items = order.OrderItems.Select(oi=> new OrderItemResponse()
                 {
                     ProductId = oi.ProductId,
                     Quantity = oi.Quantity,
@@ -139,7 +127,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         {
             _logger.LogError(ex, "Error occured while creating order for Customer ID: {CustomerId}",
                 request.Request.CustomerId);
-            await _unitOfWork.RollbackAsync();
             throw;
         }
     }
