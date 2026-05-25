@@ -30,8 +30,6 @@
       <Folder Include="Features\Categories\Queries\" />
       <Folder Include="Features\Customers\Commands\" />
       <Folder Include="Features\Customers\Queries\" />
-      <Folder Include="Features\Employees\Commands\" />
-      <Folder Include="Features\Employees\Queries\" />
     </ItemGroup>
 
 </Project>

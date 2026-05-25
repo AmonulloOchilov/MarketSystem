@@ -57,9 +57,6 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ExceptionMiddleware>();
