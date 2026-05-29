@@ -32,6 +32,7 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
         
         if (exists)
         {
+            _logger.LogWarning("Employee already exists with username or email: {Username}, {Email}", username, email);
             throw new EmployeeAlreadyExistsException();
         }
         

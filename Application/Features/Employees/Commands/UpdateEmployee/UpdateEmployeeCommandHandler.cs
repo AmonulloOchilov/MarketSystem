@@ -31,6 +31,7 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
 
         if (exists)
         {
+            _logger.LogWarning("Employee already exists with username or email: {Username}, {Email}", username, email);
             throw new EmployeeAlreadyExistsException();
         }
         
@@ -45,8 +46,8 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
 
         employee.FirstName = request.Request.FirstName;
         employee.LastName = request.Request.LastName;
-        employee.Username = request.Request.Username.Trim().ToLower();
-        employee.Email = request.Request.Email.Trim().ToLower(); 
+        employee.Username = username;
+        employee.Email = email; 
         employee.Role = request.Request.Role;
         employee.Position = request.Request.Position;
 

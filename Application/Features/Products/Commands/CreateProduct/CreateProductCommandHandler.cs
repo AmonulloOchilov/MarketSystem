@@ -27,6 +27,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
         if (exists)
         {
+            _logger.LogWarning("Product already exists with name: {ProductName}", name);
             throw new ProductAlreadyExistsException();
         }
         
@@ -34,7 +35,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         
         var product = new Product()
         {
-            Name = request.Request.Name,
+            Name = name,
             Price = request.Request.Price,
             Stock = request.Request.Stock,
             CategoryId = request.Request.CategoryId

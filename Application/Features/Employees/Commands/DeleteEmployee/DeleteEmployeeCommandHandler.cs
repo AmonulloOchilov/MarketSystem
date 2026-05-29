@@ -1,5 +1,4 @@
 using Application.Exceptions;
-using Application.Features.Employees.Commands.CreateEmployee;
 using Application.Interfaces.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

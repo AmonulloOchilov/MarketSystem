@@ -1,6 +1,11 @@
 using Application.DTOs.Request;
 using Application.DTOs.Response;
-using Application.Interfaces;
+using Application.Features.Customers.Commands.CreateCustomer;
+using Application.Features.Customers.Commands.DeleteCustomer;
+using Application.Features.Customers.Commands.UpdateCustomer;
+using Application.Features.Customers.Queries.GetAllCustomers;
+using Application.Features.Customers.Queries.GetCustomersById;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,47 +16,46 @@ namespace MarketSystem.API.Controllers;
 [Authorize(Roles = "Admin,Employee")]
 public class CustomerController : ControllerBase
 {
-    private readonly ICustomerService _service;
+    private readonly IMediator _mediator;
 
-    public CustomerController(ICustomerService service)
+    public CustomerController(IMediator mediator)
     {
-        _service = service;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<CustomerResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
+        var result = await _mediator.Send(new GetAllCustomersQuery(pageNumber, pageSize));
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerResponse>> GetByIdAsync(int id)
     {
-        var result = await _service.GetByIdAsync(id);
-        
+        var result = await _mediator.Send(new GetCustomerByIdQuery(id));
         return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync(CreateCustomerRequest request)
     {
-        return Ok(await _service.CreateAsync(request));
+        var result = await _mediator.Send(new CreateCustomerCommand(request));
+        return Ok(result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(int id, UpdateCustomerRequest request)
     {
-        var result = await _service.UpdateAsync(id, request);
-       
+        var result = await _mediator.Send(new UpdateCustomerCommand(id, request));
         return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        var result = await _service.DeleteAsync(id);
-        
-        return Ok(result);
+        await _mediator.Send(new DeleteCustomerCommand(id));
+        return NoContent();
     }
 }

@@ -21,6 +21,19 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
     {
         _logger.LogInformation("Updating product with ID: {ProductId}", request.ProductId);
         
+        var name = request.Request.Name.Trim().ToLower();
+
+        var exists = await _dbContext.Products
+            .AnyAsync(p =>
+                p.Id != request.ProductId &&
+                p.Name.ToLower() == name, cancellationToken);
+
+        if (exists)
+        {
+            _logger.LogWarning("Product already exists with name: {ProductName}", name);
+            throw new ProductAlreadyExistsException();
+        }
+        
         var product = await _dbContext.Products.FirstOrDefaultAsync(p=>p.Id == request.ProductId, cancellationToken);
         if (product == null)
         {
@@ -28,7 +41,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
             throw new ProductNotFoundException(request.ProductId);
         }
 
-        product.Name = request.Request.Name;
+        product.Name = name;
         product.Price = request.Request.Price;
         product.Stock = request.Request.Stock;
         product.CategoryId = request.Request.CategoryId;
