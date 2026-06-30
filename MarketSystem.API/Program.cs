@@ -48,9 +48,6 @@ builder.Services.AddDbContext<MarketDbContext>(options =>
 });
 builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<MarketDbContext>());
 
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 

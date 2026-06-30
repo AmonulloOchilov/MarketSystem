@@ -26,8 +26,6 @@
     <ItemGroup>
       <Folder Include="Features\Admins\Commands\" />
       <Folder Include="Features\Admins\Queries\" />
-      <Folder Include="Features\Categories\Commands\" />
-      <Folder Include="Features\Categories\Queries\" />
     </ItemGroup>
 
 </Project>
