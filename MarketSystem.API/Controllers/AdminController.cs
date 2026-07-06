@@ -1,6 +1,11 @@
 using Application.DTOs.Request;
 using Application.DTOs.Response;
-using Application.Interfaces;
+using Application.Features.Admins.Commands.CreateAdmin;
+using Application.Features.Admins.Commands.DeleteAdmin;
+using Application.Features.Admins.Commands.UpdateAdmin;
+using Application.Features.Admins.Queries.GetAdminById;
+using Application.Features.Admins.Queries.GetAllAdmins;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,42 +15,46 @@ namespace MarketSystem.API.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
 {
-    private readonly IAdminService _service;
+    private readonly IMediator _mediator;
 
-    public AdminController(IAdminService service)
+    public AdminController(IMediator mediator)
     {
-        _service = service;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<AdminResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        return Ok(await _service.GetAllAsync(pageNumber, pageSize));
+        var result = await _mediator.Send(new GetAllAdminsQuery(pageNumber, pageSize));
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<AdminResponse>> GetByIdAsync(int id)
     {
-        return Ok(await _service.GetByIdAsync(id));
+        var result = await _mediator.Send(new GetAdminByIdQuery(id));
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync(CreateAdminRequest request)
     {
-        return Ok(await _service.CreateAsync(request));
+        var result = await _mediator.Send(new CreateAdminCommand(request));
+        return Ok(result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(int id, UpdateAdminRequest request)
     {
-        return Ok(await _service.UpdateAsync(id, request));
+        var result = await _mediator.Send(new UpdateAdminCommand(id, request));
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        await _service.DeleteAsync(id);
-        return Ok();
+        await _mediator.Send(new DeleteAdminCommand(id));
+        return NoContent();
     }
 }
