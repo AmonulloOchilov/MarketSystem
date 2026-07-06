@@ -1,8 +1,6 @@
 using Application.DTOs.Response;
 using Application.Exceptions;
 using Application.Interfaces.Data;
-using Application.Interfaces.Persistence;
-using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;

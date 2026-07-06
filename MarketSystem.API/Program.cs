@@ -1,15 +1,12 @@
 using System.Text;
 using Application;
-using Application.Interfaces;
 using Application.Interfaces.Data;
-using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using Application.Validators.Product;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
-using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using MarketSystem.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +52,6 @@ builder.Services.AddScoped<ExceptionMiddleware>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
@@ -108,8 +104,6 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
-
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
 

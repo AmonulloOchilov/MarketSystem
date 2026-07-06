@@ -1,5 +1,8 @@
 using Application.DTOs.Request;
-using Application.Interfaces;
+using Application.Features.Authentications.Commands.Login;
+using Application.Features.Authentications.Commands.Refresh;
+using Application.Features.Authentications.Commands.Register;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketSystem.API.Controllers;
@@ -8,38 +11,31 @@ namespace MarketSystem.API.Controllers;
 [Route("api/[controller]")]
 public class AuthenticationController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly IMediator _mediator;
 
-    public AuthenticationController(IAuthService authService)
+    public AuthenticationController(IMediator mediator)
     {
-        _authService = authService;
+        _mediator = mediator;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var result = await _authService.LoginAsync(request);
+        var result = await _mediator.Send(new LoginCommand(request));
         return Ok(result);
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        await _authService.RegisterAsync(request);
+        await _mediator.Send(new RegisterCommand(request));
         return Ok("User created");
     }
 
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
     {
-        var result = await _authService.RefreshTokenAsync(request.RefreshToken);
+        var result = await _mediator.Send(new RefreshTokenCommand(request));
         return Ok(result);
-    }
-
-    [HttpGet("test")]
-    [Microsoft.AspNetCore.Authorization.Authorize]
-    public IActionResult Test()
-    {
-        return Ok("You are authenticated");
     }
 }
