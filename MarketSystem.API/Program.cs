@@ -1,15 +1,12 @@
 using System.Text;
-using Application.DTOs.Request;
-using Application.Interfaces;
-using Application.Interfaces.Persistence;
+using Application;
+using Application.Interfaces.Data;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using Application.Validators.Product;
-using Domain.Entities;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
-using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using MarketSystem.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
@@ -46,24 +43,7 @@ builder.Services.AddDbContext<MarketDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
 });
-
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
-
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
-
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-
-builder.Services.AddScoped<IAdminRepository, AdminRepository>();
-builder.Services.AddScoped<IAdminService, AdminService>();
-
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<MarketDbContext>());
 
 builder.Services.AddControllers();
 
@@ -72,7 +52,6 @@ builder.Services.AddScoped<ExceptionMiddleware>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductRequestValidator>();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
@@ -126,7 +105,7 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
 
 var app = builder.Build();
 

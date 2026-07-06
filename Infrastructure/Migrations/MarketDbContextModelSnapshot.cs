@@ -109,6 +109,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(8)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FirstName")
@@ -121,6 +122,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
@@ -211,9 +215,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Customer", b =>
                 {
                     b.HasBaseType("Domain.Entities.Person");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
 
                     b.HasDiscriminator().HasValue("Customer");
                 });
