@@ -28,7 +28,8 @@ public class CreateAdminCommandHandler : IRequestHandler<CreateAdminCommand, Adm
         var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
 
         var exists =
-            await _dbContext.Admins.AnyAsync(e => e.Username == username || e.Email == email, cancellationToken);
+            await _dbContext.Admins.AnyAsync(
+                e => e.Username == username || e.Email == email || e.PhoneNumber == phoneNumber, cancellationToken);
         
         if (exists)
         {

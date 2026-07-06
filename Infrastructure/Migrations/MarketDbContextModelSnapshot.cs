@@ -109,6 +109,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(8)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FirstName")
@@ -121,6 +122,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
@@ -205,15 +209,6 @@ namespace Infrastructure.Migrations
                 {
                     b.HasBaseType("Domain.Entities.Person");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.ToTable("Persons", t =>
-                        {
-                            t.Property("PhoneNumber")
-                                .HasColumnName("Admin_PhoneNumber");
-                        });
-
                     b.HasDiscriminator().HasValue("Admin");
                 });
 
@@ -221,24 +216,12 @@ namespace Infrastructure.Migrations
                 {
                     b.HasBaseType("Domain.Entities.Person");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.ToTable("Persons", t =>
-                        {
-                            t.Property("PhoneNumber")
-                                .HasColumnName("Customer_PhoneNumber");
-                        });
-
                     b.HasDiscriminator().HasValue("Customer");
                 });
 
             modelBuilder.Entity("Domain.Entities.Employee", b =>
                 {
                     b.HasBaseType("Domain.Entities.Person");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
 
                     b.Property<string>("Position")
                         .IsRequired()
