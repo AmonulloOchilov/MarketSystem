@@ -34,7 +34,8 @@ public class GetAdminByIdQueryHandler : IRequestHandler<GetAdminByIdQuery, Admin
             LastName = admin.LastName,
             Username = admin.Username,
             Role = admin.Role,
-            Email = admin.Email
+            Email = admin.Email,
+            PhoneNumber = admin.PhoneNumber
         };
     }
 }

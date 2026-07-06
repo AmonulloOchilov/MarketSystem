@@ -7,5 +7,6 @@ public class UpdateEmployeeRequest
     public string Username { get; set; } = null!;
     public string Email { get; set; }
     public string Role { get; set; } = null!;
+    public string? PhoneNumber { get; set; }
     public string Position { get; set; } = null!;
 }

@@ -26,13 +26,15 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
         
         var username = request.Request.Username.Trim().ToLower();
         var email = request.Request.Email.Trim().ToLower();
+        var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
 
         var exists =
-            await _dbContext.Customers.AnyAsync(e => e.Username == username || e.Email == email, cancellationToken);
+            await _dbContext.Customers.AnyAsync(
+                e => e.Username == username || e.Email == email || e.PhoneNumber == phoneNumber, cancellationToken);
         
         if (exists)
         {
-            _logger.LogWarning("Customer already exists with username or email: {Username}, {Email}", username, email);
+            _logger.LogWarning("Customer already exists with username or email or phone number: {Username}, {Email}", username, email);
             throw new CustomerAlreadyExistsException();
         }
         
@@ -44,7 +46,7 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             Role = request.Request.Role,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Request.Password),
             Email = email,
-            PhoneNumber = request.Request.PhoneNumber
+            PhoneNumber = phoneNumber
         };
 
         await _dbContext.Customers.AddAsync(customer, cancellationToken);

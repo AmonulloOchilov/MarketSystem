@@ -45,7 +45,8 @@ public class GetAllEmployeesQueryHandler : IRequestHandler<GetAllEmployeesQuery,
                 Username = e.Username,
                 Role = e.Role,
                 Position = e.Position,
-                Email = e.Email
+                Email = e.Email,
+                PhoneNumber = e.PhoneNumber
             }).ToListAsync(cancellationToken);
         
         _logger.LogInformation("Returned {Count} employees out of {Total}", employees.Count, totalCount);

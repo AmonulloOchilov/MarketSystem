@@ -24,7 +24,8 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
 
         var username = request.Request.Username.Trim().ToLower();
         var email = request.Request.Email.Trim().ToLower();
-
+        var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
+        
         var exists = await _dbContext.Customers
             .AnyAsync(c =>
                 c.Id != request.CustomerId &&
@@ -32,7 +33,9 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
 
         if (exists)
         {
-            _logger.LogWarning("Customer already exists with username or email: {Username}, {Email}", username, email);
+            _logger.LogWarning(
+                "Customer already exists with username or email or phone number: {Username}, {Email},  {PhoneNumber}",
+                username, email, phoneNumber);
             throw new CustomerAlreadyExistsException();
         }
         
@@ -50,7 +53,7 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
         customer.Username = username;
         customer.Role = request.Request.Role;
         customer.Email = email;
-        customer.PhoneNumber = request.Request.PhoneNumber;
+        customer.PhoneNumber = phoneNumber;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

@@ -4,7 +4,6 @@ using Application.Features.Admins.Commands.CreateAdmin;
 using Application.Features.Admins.Commands.DeleteAdmin;
 using Application.Features.Admins.Commands.UpdateAdmin;
 using Application.Features.Admins.Queries.GetAdminById;
-using Application.Features.Admins.Queries.GetAllAdmins;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +20,7 @@ public class AdminController : ControllerBase
     {
         _mediator = mediator;
     }
-
-    [HttpGet]
-    public async Task<ActionResult<AdminResponse>> GetAllAsync([FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10)
-    {
-        var result = await _mediator.Send(new GetAllAdminsQuery(pageNumber, pageSize));
-        return Ok(result);
-    }
-
+    
     [HttpGet("{id}")]
     public async Task<ActionResult<AdminResponse>> GetByIdAsync(int id)
     {

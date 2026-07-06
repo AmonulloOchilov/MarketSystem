@@ -24,15 +24,18 @@ public class UpdateAdminCommandHandler : IRequestHandler<UpdateAdminCommand, Adm
         
         var username = request.Request.Username.Trim().ToLower();
         var email = request.Request.Email.Trim().ToLower();
+        var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
 
         var exists = await _dbContext.Admins
             .AnyAsync(c =>
                 c.Id != request.AdminId &&
-                (c.Username == username || c.Email == email), cancellationToken);
+                (c.Username == username || c.Email == email || c.PhoneNumber == phoneNumber), cancellationToken);
 
         if (exists)
         {
-            _logger.LogWarning("Admin already exists with username or email: {Username}, {Email}", username, email);
+            _logger.LogWarning(
+                "Admin already exists with username or email or phone number: {Username}, {Email}, {PhoneNumber}",
+                username, email, phoneNumber);
             throw new AdminAlreadyExistsException();
         }
 
@@ -49,6 +52,7 @@ public class UpdateAdminCommandHandler : IRequestHandler<UpdateAdminCommand, Adm
         admin.Username = username;
         admin.Role = request.Request.Role;
         admin.Email = email;
+        admin.PhoneNumber = phoneNumber;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         
@@ -62,7 +66,8 @@ public class UpdateAdminCommandHandler : IRequestHandler<UpdateAdminCommand, Adm
             LastName = admin.LastName,
             Username = admin.Username,
             Role = admin.Role,
-            Email = admin.Email
+            Email = admin.Email,
+            PhoneNumber = admin.PhoneNumber
         };
     }
 }

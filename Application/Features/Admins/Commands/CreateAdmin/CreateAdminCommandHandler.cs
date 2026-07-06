@@ -25,13 +25,16 @@ public class CreateAdminCommandHandler : IRequestHandler<CreateAdminCommand, Adm
         
         var username = request.Request.Username.Trim().ToLower();
         var email = request.Request.Email.Trim().ToLower();
+        var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
 
         var exists =
             await _dbContext.Admins.AnyAsync(e => e.Username == username || e.Email == email, cancellationToken);
         
         if (exists)
         {
-            _logger.LogWarning("Admin already exists with username or email: {Username}, {Email}", username, email);
+            _logger.LogWarning(
+                "Admin already exists with username or email or phone number: {Username}, {Email}, {PhoneNumber}",
+                username, email, phoneNumber);
             throw new AdminAlreadyExistsException();
         }
         var admin = new Admin
@@ -39,6 +42,7 @@ public class CreateAdminCommandHandler : IRequestHandler<CreateAdminCommand, Adm
             FirstName = request.Request.FirstName,
             LastName = request.Request.LastName,
             Username = request.Request.Username,
+            PhoneNumber = request.Request.PhoneNumber,
             Role = request.Request.Role,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Request.Password),
             Email = request.Request.Email
@@ -56,7 +60,8 @@ public class CreateAdminCommandHandler : IRequestHandler<CreateAdminCommand, Adm
             LastName = admin.LastName,
             Username = admin.Username,
             Role = admin.Role,
-            Email = admin.Email
+            Email = admin.Email,
+            PhoneNumber = admin.PhoneNumber
         };
     }
 }

@@ -26,13 +26,15 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
 
         var username = request.Request.Username.Trim().ToLower();
         var email = request.Request.Email.Trim().ToLower();
+        var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
 
         var exists =
-            await _dbContext.Employees.AnyAsync(e => e.Username == username || e.Email == email, cancellationToken);
+            await _dbContext.Employees.AnyAsync(
+                e => e.Username == username || e.Email == email || e.PhoneNumber == phoneNumber, cancellationToken);
         
         if (exists)
         {
-            _logger.LogWarning("Employee already exists with username or email: {Username}, {Email}", username, email);
+            _logger.LogWarning("Employee already exists with username or email or phone number: {Username}, {Email}, {PhoneNumber}", username, email, phoneNumber);
             throw new EmployeeAlreadyExistsException();
         }
         
@@ -44,7 +46,8 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
             Role = request.Request.Role,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Request.Password),
             Position = request.Request.Position,
-            Email = email
+            Email = email,
+            PhoneNumber = phoneNumber
         };
 
         await _dbContext.Employees.AddAsync(employee, cancellationToken);
@@ -60,7 +63,8 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
             Username = employee.Username,
             Role = employee.Role,
             Position = employee.Position,
-            Email = employee.Email
+            Email = employee.Email,
+            PhoneNumber = employee.PhoneNumber
         };
     }
 }

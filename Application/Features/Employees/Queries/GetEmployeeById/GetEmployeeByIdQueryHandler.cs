@@ -36,7 +36,8 @@ public class GetEmployeeByIdQueryHandler : IRequestHandler<GetEmployeeByIdQuery,
             Username = employee.Username,
             Role = employee.Role,
             Position = employee.Position,
-            Email = employee.Email
+            Email = employee.Email,
+            PhoneNumber = employee.PhoneNumber
         };
     }
 }

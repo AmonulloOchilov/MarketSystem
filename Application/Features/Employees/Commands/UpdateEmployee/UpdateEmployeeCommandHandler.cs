@@ -23,15 +23,18 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
 
         var username = request.Request.Username.Trim().ToLower();
         var email = request.Request.Email.Trim().ToLower();
+        var phoneNumber = request.Request.PhoneNumber.Trim().ToLower();
 
         var exists = await _dbContext.Employees
             .AnyAsync(e =>
                     e.Id != request.EmployeeId &&
-                    (e.Username == username || e.Email == email), cancellationToken);
+                    (e.Username == username || e.Email == email || e.PhoneNumber == phoneNumber), cancellationToken);
 
         if (exists)
         {
-            _logger.LogWarning("Employee already exists with username or email: {Username}, {Email}", username, email);
+            _logger.LogWarning(
+                "Employee already exists with username or email or phone number: {Username}, {Email}, {PhoneNumber}",
+                username, email, phoneNumber);
             throw new EmployeeAlreadyExistsException();
         }
         
@@ -50,6 +53,7 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
         employee.Email = email; 
         employee.Role = request.Request.Role;
         employee.Position = request.Request.Position;
+        employee.PhoneNumber = phoneNumber;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -65,7 +69,8 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
             Username = employee.Username,
             Role = employee.Role,
             Position = employee.Position,
-            Email = employee.Email
+            Email = employee.Email,
+            PhoneNumber = employee.PhoneNumber
         };
     }
 }
