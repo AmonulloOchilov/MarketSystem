@@ -1,4 +1,5 @@
 using Application.Features.Reports.Queries.GetEmployeePerformance;
+using Application.Features.Reports.Queries.GetLowSellingProducts;
 using Application.Features.Reports.Queries.GetTopSellingProducts;
 using Application.Features.Reports.Queries.GetTotalRevenue;
 using MediatR;
@@ -44,6 +45,14 @@ public class ReportsController : ControllerBase
         [FromQuery] int pageSize = 10)
     {
         var result = await _mediator.Send(new GetTopSellingProductsQuery(pageNumber, pageSize));
+        return Ok(result);
+    }
+
+    [HttpGet("lowsellingproducts")]
+    public async Task<IActionResult> GetLowSellingProducts([FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var result = await _mediator.Send(new GetLowSellingProductsQuery(pageNumber, pageSize));
         return Ok(result);
     }
 }
