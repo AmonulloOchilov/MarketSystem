@@ -43,8 +43,8 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
             FirstName = request.Request.FirstName,
             LastName = request.Request.LastName,
             Username = username,
-            Role = request.Request.Role,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Request.Password),
+            Role = request.Request.Role,
             Position = request.Request.Position,
             Email = email,
             PhoneNumber = phoneNumber

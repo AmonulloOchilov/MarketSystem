@@ -33,7 +33,9 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, bool>
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Request.Password),
             FirstName = request.Request.FirstName,
             LastName = request.Request.LastName,
-            Role = request.Request.Role
+            Role = request.Request.Role,
+            PhoneNumber = request.Request.PhoneNumber,
+            Email = request.Request.Email
         };
 
         await _personRepo.AddAsync(user);
